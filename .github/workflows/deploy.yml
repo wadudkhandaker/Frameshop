@@ -30,7 +30,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           
       - name: Install dependencies
-        run: npm ci --registry https://registry.npmjs.org
+        run: npm install --registry https://registry.npmjs.org
         
       - name: Build with Next.js
         run: npm run build

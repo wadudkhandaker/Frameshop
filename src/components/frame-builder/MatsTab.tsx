@@ -190,7 +190,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
                     checked={matWidthType === 'uniform'}
                     onChange={(e) => setMatWidthType(e.target.value as MatWidthType)}
                     className="mr-2 text-amber-600"
-                    disabled={matStyle === '0'}
+                    disabled={matStyle === ('0' as MatStyle)}
                   />
                   Uniform Width
                 </label>
@@ -202,7 +202,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
                   min="2"
                   max="20"
                   step="0.1"
-                  disabled={matStyle === '0' || matWidthType !== 'uniform'}
+                  disabled={matStyle === ('0' as MatStyle) || matWidthType !== 'uniform'}
                 />
                 <span className="text-sm text-gray-600">cm</span>
               </div>
@@ -215,7 +215,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
                     checked={matWidthType === 'custom'}
                     onChange={(e) => setMatWidthType(e.target.value as MatWidthType)}
                     className="mr-2 text-amber-600"
-                    disabled={matStyle === '0'}
+                    disabled={matStyle === ('0' as MatStyle)}
                   />
                   Custom Width
                 </label>
@@ -229,15 +229,15 @@ const MatsTab: React.FC<MatsTabProps> = ({
                         <input
                           type="number"
                           value={customWidths[side as keyof typeof customWidths]}
-                          onChange={(e) => setCustomWidths(prev => ({
-                            ...prev,
+                          onChange={(e) => setCustomWidths({
+                            ...customWidths,
                             [side]: e.target.value
-                          }))}
+                          })}
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                           min="2"
                           max="20"
                           step="0.1"
-                          disabled={matStyle === '0'}
+                          disabled={matStyle === ('0' as MatStyle)}
                         />
                       </div>
                     ))}

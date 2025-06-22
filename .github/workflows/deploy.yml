@@ -25,17 +25,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           
-      - name: Clear npm cache and configure registry
-        run: |
-          npm cache clean --force
-          npm config set registry https://registry.npmjs.org/
-          npm config delete //registry.npmjs.org/:_authToken || true
-          
       - name: Install dependencies
-        run: npm install --no-audit --no-fund --prefer-offline
+        run: npm install
         
       - name: Build with Next.js
         run: npm run build

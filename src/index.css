@@ -2,16 +2,163 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Ensure styles are loaded */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Custom styles for Official Memorabilia website */
+
+/* Slider styles */
+.slider {
+  position: relative;
+  overflow: hidden;
 }
 
-* {
-  box-sizing: border-box;
+.flexslider {
+  position: relative;
+}
+
+.flex-viewport {
+  overflow: hidden;
+  position: relative;
+}
+
+.slides {
+  display: flex;
+  transition: transform 0.6s ease-in-out;
+}
+
+.slide {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.textOverlay {
+  background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+  z-index: 10;
+}
+
+.mainHead {
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.subHead {
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.submit {
+  transition: all 0.3s ease;
+}
+
+.submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Product grid styles */
+.productListStatic {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.item {
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.item:hover {
+  transform: translateY(-4px);
+}
+
+.imgWrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* Tile styles */
+.tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.tile:hover {
+  transform: scale(1.02);
+}
+
+.imageBG {
+  transition: transform 0.5s ease;
+}
+
+.overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+}
+
+/* Auction styles */
+.cdo-list-item {
+  transition: transform 0.3s ease;
+}
+
+.cdo-list-item:hover {
+  transform: translateY(-4px);
+}
+
+.cdo-btn--action {
+  transition: all 0.3s ease;
+}
+
+.cdo-btn--action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(227, 24, 55, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .slides {
+    flex-direction: column;
+  }
+  
+  .slide {
+    width: 100% !important;
+  }
+  
+  .productListStatic {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .productListStatic {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .productListStatic {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

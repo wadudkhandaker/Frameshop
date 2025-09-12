@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Search, Star, DollarSign, ChevronDown, Info } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Search, Star, DollarSign, ChevronDown, Info, ChevronLeft, ChevronRight, Palette, Crown, Zap, Heart, Sparkles, Gem, TreePine, Home, Clock, Award, Coffee, Sun, Moon, Waves, Flower2, Diamond, Shield } from 'lucide-react';
 import { Frame, SortOption } from './types';
 import { frames, sortOptions, categories } from './data';
 
@@ -28,10 +28,14 @@ const FramesTab: React.FC<FramesTabProps> = ({
   hideUnsuitableFrames,
   setHideUnsuitableFrames
 }) => {
+
   const filteredAndSortedFrames = useMemo(() => {
     let filtered = frames;
 
-    if (activeCategory === 'Popular') {
+    if (activeCategory === 'All') {
+      // Show all frames when "All" is selected
+      filtered = frames;
+    } else if (activeCategory === 'Popular') {
       filtered = filtered.filter(frame => frame.isPopular);
     } else if (activeCategory === 'On Sale') {
       filtered = filtered.filter(frame => frame.isOnSale);
@@ -63,130 +67,208 @@ const FramesTab: React.FC<FramesTabProps> = ({
     setSelectedFrame(selectedFrame?.id === frame.id ? null : frame);
   };
 
+
+
+  const getCategoryIcon = (iconName: string | null) => {
+    switch (iconName) {
+      case 'star': return <Star className="w-4 h-4" />;
+      case 'dollar': return <DollarSign className="w-4 h-4" />;
+      case 'palette': return <Palette className="w-4 h-4" />;
+      case 'crown': return <Crown className="w-4 h-4" />;
+      case 'zap': return <Zap className="w-4 h-4" />;
+      case 'heart': return <Heart className="w-4 h-4" />;
+      case 'sparkles': return <Sparkles className="w-4 h-4" />;
+      case 'gem': return <Gem className="w-4 h-4" />;
+      case 'treepine': return <TreePine className="w-4 h-4" />;
+      case 'home': return <Home className="w-4 h-4" />;
+      case 'clock': return <Clock className="w-4 h-4" />;
+      case 'award': return <Award className="w-4 h-4" />;
+      case 'coffee': return <Coffee className="w-4 h-4" />;
+      case 'sun': return <Sun className="w-4 h-4" />;
+      case 'moon': return <Moon className="w-4 h-4" />;
+      case 'waves': return <Waves className="w-4 h-4" />;
+      case 'flower': return <Flower2 className="w-4 h-4" />;
+      case 'diamond': return <Diamond className="w-4 h-4" />;
+      case 'shield': return <Shield className="w-4 h-4" />;
+      default: return null;
+    }
+  };
+
   return (
-    <div>
+    <div className="frame-tab">
       {/* Frame Controls */}
-      <div className="grid md:grid-cols-2 gap-4 mb-6">
-        <div className="relative">
-          <label htmlFor="sort-select" className="block text-sm font-medium text-gray-700 mb-2">
-            Sort Options
-          </label>
-          <div className="relative">
-            <select
-              id="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent appearance-none bg-white pr-10"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+      <div className="columns mb-6">
+        <div className="column">
+          <div className="form-group">
+            <div className="select is-fullwidth">
+              <select
+                id="frames-order-by"
+                title="Sorting Options"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent appearance-none bg-white pr-10"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
-
-        <div>
-          <label htmlFor="frame-search" className="block text-sm font-medium text-gray-700 mb-2">
-            Search Frames
-          </label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        
+        <div className="column">
+          <div className="form-group">
             <input
-              id="frame-search"
               type="text"
+              id="frames-search-input"
+              title="Frame Search"
+              aria-label="Search for frames"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Type a frame code or search term"
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
         </div>
       </div>
 
       {/* Category Tabs */}
-      <div className="border-b border-gray-200 mb-4">
-        <div className="flex flex-wrap gap-1">
+      <div className="mb-4">
+        <ul className="FramesTab---tab-list---2iFa6_0 flex flex-wrap gap-2">
           {categories.map((category) => (
-            <button
-              key={category.name}
-              onClick={() => setActiveCategory(category.name)}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200 flex items-center gap-2 ${
-                activeCategory === category.name
-                  ? 'bg-amber-600 text-white border-b-2 border-amber-600'
-                  : 'text-gray-600 hover:text-amber-600 hover:bg-amber-50'
-              }`}
-            >
-              {category.icon === 'star' && <Star className="w-4 h-4" />}
-              {category.icon === 'dollar' && <DollarSign className="w-4 h-4" />}
-              {category.name}
-            </button>
+            <li key={category.name} className="FramesTab---tab---3c_QL_0 list-none">
+              <span
+                onClick={() => setActiveCategory(category.name)}
+                className={`FramesTab---tab-text---3IkZG_0 px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap cursor-pointer border ${
+                  activeCategory === category.name
+                    ? 'FramesTab---current-tab---3tG84_0 bg-amber-600 text-white border-amber-600 shadow-sm'
+                    : 'text-gray-600 hover:text-amber-600 hover:bg-gray-50 border-gray-200 hover:border-amber-300'
+                }`}
+              >
+                {getCategoryIcon(category.icon)}
+                {category.name}
+              </span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
-      {/* Frame Grid - Fixed height with scrolling */}
-      <div className="overflow-y-auto max-h-[500px] pr-2 mb-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {filteredAndSortedFrames.map((frame) => (
-            <div
-              key={frame.id}
-              className={`bg-white rounded-lg border-2 transition-all duration-200 cursor-pointer hover:shadow-lg ${
-                selectedFrame?.id === frame.id 
-                  ? 'border-amber-500 ring-2 ring-amber-200' 
-                  : 'border-gray-200 hover:border-amber-300'
-              }`}
-              onClick={() => handleFrameSelect(frame)}
-            >
-              <div className="relative">
-                <img
-                  src={frame.image}
-                  alt={`Frame ${frame.code}`}
-                  className="w-full h-32 object-cover rounded-t-lg"
-                />
-                {frame.isOnSale && (
-                  <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                    Sale
+      {/* Frame List Container */}
+      <div className="frame-list-container">
+        {/* Debug: Show number of frames */}
+        <div className="mb-2 text-sm text-gray-500">
+          Showing {filteredAndSortedFrames.length} frames
+        </div>
+        
+        <div className="overflow-y-auto max-h-[600px] pr-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pb-4">
+            {filteredAndSortedFrames.map((frame) => (
+              <div
+                key={frame.id}
+                className={`frame-card__container ${
+                  selectedFrame?.id === frame.id ? 'frame-card--selected' : ''
+                }`}
+              >
+                <div
+                  className={`frame-card bg-white rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${
+                    selectedFrame?.id === frame.id 
+                      ? 'border-blue-500 ring-1 ring-blue-200' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleFrameSelect(frame)}
+                >
+                  <div className="frame-card__main">
+                    <div className="relative">
+                      <img
+                        src={frame.image}
+                        alt={`Frame ${frame.code}`}
+                        className="frame-image w-full h-28 object-cover rounded-t-lg"
+                      />
+                      {frame.isOnSale && (
+                        <div className="absolute top-1 left-1 bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-semibold">
+                          Sale
+                        </div>
+                      )}
+                      {frame.isPopular && (
+                        <div className="absolute top-1 right-1 bg-amber-500 text-white p-0.5 rounded">
+                          <Star className="w-2.5 h-2.5 fill-current" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-2 text-center">
+                      <div className="frame-card__code font-semibold text-gray-900 text-sm">{frame.code}</div>
+                      <div className="frame-card__size text-xs text-gray-600">Width: {frame.width} cm</div>
+                      <div className="frame-card__rate text-xs text-gray-600">Price Rate {frame.priceRate}</div>
+                    </div>
                   </div>
-                )}
-                {frame.isPopular && (
-                  <div className="absolute top-2 right-2 bg-amber-500 text-white p-1 rounded-full">
-                    <Star className="w-3 h-3 fill-current" />
-                  </div>
-                )}
-              </div>
-              <div className="p-3">
-                <div className="text-center">
-                  <p className="font-semibold text-gray-900">{frame.code}</p>
-                  <p className="text-sm text-gray-600">Width: {frame.width} cm</p>
-                  <p className="text-sm text-gray-600">Price Rate {frame.priceRate}</p>
+                  
+                  {/* Expanded Frame Info */}
+                  {selectedFrame?.id === frame.id && (
+                    <div className="frame-card__info frame-card__info--expanded border-t border-gray-200 p-3">
+                      <table className="frame-card__info__table w-full text-sm">
+                        <thead>
+                          <tr>
+                            <td colSpan={2} className="title font-semibold text-gray-900 text-center pb-2">
+                              {frame.code}
+                            </td>
+                          </tr>
+                        </thead>
+                        <tbody className="text-gray-600">
+                          <tr className="border-b border-gray-100">
+                            <td className="py-1">Width</td>
+                            <td className="py-1 text-right">{frame.width} cm</td>
+                          </tr>
+                          <tr className="border-b border-gray-100">
+                            <td className="py-1">Depth</td>
+                            <td className="py-1 text-right">{frame.depth} cm</td>
+                          </tr>
+                          <tr className="border-b border-gray-100">
+                            <td className="py-1">Rebate</td>
+                            <td className="py-1 text-right">{frame.rebate} cm</td>
+                          </tr>
+                          <tr className="border-b border-gray-100">
+                            <td className="py-1">Material</td>
+                            <td className="py-1 text-right">{frame.material}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1">Colour</td>
+                            <td className="py-1 text-right">{frame.color}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Hide Unsuitable Frames */}
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="hide-unsuitable"
-          checked={hideUnsuitableFrames}
-          onChange={(e) => setHideUnsuitableFrames(e.target.checked)}
-          className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
-        />
-        <label htmlFor="hide-unsuitable" className="text-sm text-gray-700">
-          Hide Unsuitable Frames
+      <div className="mt-4">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            aria-label="Hide unsuitable frames"
+            checked={hideUnsuitableFrames}
+            onChange={(e) => setHideUnsuitableFrames(e.target.checked)}
+            className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+          />
+          <span className="text-sm text-gray-700">Hide Unsuitable Frames</span>
         </label>
-        <div className="relative group">
-          <Info className="w-4 h-4 text-gray-400 cursor-help" />
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-            Each frame has a maximum length it can support. You can uncheck this option to view the entire collection.
+        <button 
+          tabIndex={-1} 
+          className="tooltip__button ml-2" 
+          aria-label="Hide unsuitable frames tooltip"
+        >
+          <div className="tooltip__content hidden opacity-0">
+            <span>Each frame has a maximum length it can support. You can uncheck this option to view the entire collection.</span>
           </div>
-        </div>
+          <Info className="w-4 h-4 text-gray-400 cursor-help" />
+        </button>
       </div>
     </div>
   );

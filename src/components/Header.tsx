@@ -6,6 +6,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
+    { name: 'Frame Builder', href: '/frame-builder', isPrimary: true },
     { name: 'Sports Memorabilia', href: '/sports-memorabilia', submenu: [
       { name: 'Rugby', href: '/sports-memorabilia/rugby' },
       { name: 'Soccer', href: '/sports-memorabilia/soccer' },
@@ -19,8 +20,7 @@ export default function Header() {
     ]},
     { name: 'Charity Auctions', href: '/charity-auctions' },
     { name: 'Pick up & Delivery', href: '/pickup-delivery' },
-    { name: 'Contact Us', href: '/contact' },
-    { name: 'Gift Card', href: '/gift-card' }
+    { name: 'Contact Us', href: '/contact' }
   ];
 
   return (
@@ -32,9 +32,6 @@ export default function Header() {
             <div className="flex items-center space-x-6">
               <Link href="/login" className="hover:text-gray-300 transition-colors">
                 Login
-              </Link>
-              <Link href="/gift-card" className="hover:text-gray-300 transition-colors">
-                Gift Card
               </Link>
             </div>
             <div className="flex items-center space-x-6">
@@ -68,7 +65,11 @@ export default function Header() {
                 <li key={item.name} className="relative group">
                   <Link 
                     href={item.href}
-                    className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm"
+                    className={`font-medium text-sm transition-colors ${
+                      item.isPrimary 
+                        ? 'bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600' 
+                        : 'text-gray-700 hover:text-red-600'
+                    }`}
                   >
                     {item.name}
                   </Link>
@@ -120,7 +121,11 @@ export default function Header() {
                 <div key={item.name}>
                   <Link
                     href={item.href}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors"
+                    className={`block px-4 py-2 transition-colors ${
+                      item.isPrimary 
+                        ? 'bg-red-500 text-white hover:bg-red-600' 
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-red-600'
+                    }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}

@@ -113,12 +113,15 @@ export default function LiveAuctions() {
             </button>
             
             <div className="slick-list overflow-hidden">
-              <div className="slick-track flex transition-transform duration-500 ease-in-out">
+              <div 
+                className="slick-track flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${currentIndex * 350}px)` }}
+              >
                 {auctionItems.map((item, index) => (
                   <div 
                     key={item.id}
-                    className={`cdo-list-item slick-slide ${index === currentIndex ? 'slick-current slick-active' : ''}`}
-                    style={{ width: '431px', minWidth: '431px' }}
+                    className="cdo-list-item slick-slide"
+                    style={{ width: '350px', minWidth: '350px', flexShrink: 0 }}
                   >
                     <div className="cdo-list-item__image">
                       <Link href={item.link} target="_blank">

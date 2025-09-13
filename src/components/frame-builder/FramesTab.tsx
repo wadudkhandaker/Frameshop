@@ -195,14 +195,15 @@ const FramesTab: React.FC<FramesTabProps> = ({
         )}
         
         {!framesLoading && !framesError && (
-          <div className="overflow-y-auto max-h-[600px] pr-2">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pb-4">
+          <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
+            <div className="flex gap-4 pb-4 min-w-max">
               {filteredAndSortedFrames.map((frame) => (
               <div
                 key={frame.id}
-                className={`frame-card__container ${
+                className={`frame-card__container flex-shrink-0 ${
                   selectedFrame?.id === frame.id ? 'frame-card--selected' : ''
                 }`}
+                style={{ width: '200px' }}
               >
                 <div
                   className={`frame-card bg-white rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${

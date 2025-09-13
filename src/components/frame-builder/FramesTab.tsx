@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Search, Star, DollarSign, ChevronDown, Info, ChevronLeft, ChevronRight, Palette, Crown, Zap, Heart, Sparkles, Gem, TreePine, Home, Clock, Award, Coffee, Sun, Moon, Waves, Flower2, Diamond, Shield } from 'lucide-react';
 import { Frame, SortOption } from './types';
-import { frames, sortOptions, categories } from './data';
+import { sortOptions, categories } from './data';
+import { useFrames, useFrameCategories, transformStrapiFrame } from '../../hooks/useFrames';
 
 interface FramesTabProps {
   selectedFrame: Frame | null;
@@ -28,6 +29,14 @@ const FramesTab: React.FC<FramesTabProps> = ({
   hideUnsuitableFrames,
   setHideUnsuitableFrames
 }) => {
+  // Fetch frames from Strapi
+  const { frames: strapiFrames, loading: framesLoading, error: framesError } = useFrames();
+  const { categories: strapiCategories, loading: categoriesLoading } = useFrameCategories();
+
+  // Transform Strapi frames to local Frame type
+  const frames = useMemo(() => {
+    return strapiFrames.map(transformStrapiFrame);
+  }, [strapiFrames]);
 
   const filteredAndSortedFrames = useMemo(() => {
     let filtered = frames;
@@ -61,7 +70,7 @@ const FramesTab: React.FC<FramesTabProps> = ({
     }
 
     return filtered;
-  }, [activeCategory, searchTerm, hideUnsuitableFrames, sortBy]);
+  }, [frames, activeCategory, searchTerm, hideUnsuitableFrames, sortBy]);
 
   const handleFrameSelect = (frame: Frame) => {
     setSelectedFrame(selectedFrame?.id === frame.id ? null : frame);
@@ -137,34 +146,58 @@ const FramesTab: React.FC<FramesTabProps> = ({
       {/* Category Tabs */}
       <div className="mb-4">
         <ul className="FramesTab---tab-list---2iFa6_0 flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <li key={category.name} className="FramesTab---tab---3c_QL_0 list-none">
-              <span
-                onClick={() => setActiveCategory(category.name)}
-                className={`FramesTab---tab-text---3IkZG_0 px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap cursor-pointer border ${
-                  activeCategory === category.name
-                    ? 'FramesTab---current-tab---3tG84_0 bg-amber-600 text-white border-amber-600 shadow-sm'
-                    : 'text-gray-600 hover:text-amber-600 hover:bg-gray-50 border-gray-200 hover:border-amber-300'
-                }`}
-              >
-                {getCategoryIcon(category.icon)}
-                {category.name}
-              </span>
-            </li>
-          ))}
+          {(strapiCategories.length > 0 ? strapiCategories : categories).map((category) => {
+            const categoryName = typeof category === 'string' ? category : category.name;
+            const categoryIcon = typeof category === 'string' ? null : category.icon;
+            return (
+              <li key={categoryName} className="FramesTab---tab---3c_QL_0 list-none">
+                <span
+                  onClick={() => setActiveCategory(categoryName)}
+                  className={`FramesTab---tab-text---3IkZG_0 px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap cursor-pointer border ${
+                    activeCategory === categoryName
+                      ? 'FramesTab---current-tab---3tG84_0 bg-amber-600 text-white border-amber-600 shadow-sm'
+                      : 'text-gray-600 hover:text-amber-600 hover:bg-gray-50 border-gray-200 hover:border-amber-300'
+                  }`}
+                >
+                  {getCategoryIcon(categoryIcon)}
+                  {categoryName}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
       {/* Frame List Container */}
       <div className="frame-list-container">
-        {/* Debug: Show number of frames */}
-        <div className="mb-2 text-sm text-gray-500">
-          Showing {filteredAndSortedFrames.length} frames
-        </div>
+        {/* Loading and Error States */}
+        {framesLoading && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading frames...</p>
+          </div>
+        )}
         
-        <div className="overflow-y-auto max-h-[600px] pr-2">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pb-4">
-            {filteredAndSortedFrames.map((frame) => (
+        {framesError && (
+          <div className="text-center py-8">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-800 text-sm">Error loading frames: {framesError}</p>
+              <p className="text-red-600 text-xs mt-1">Make sure Strapi is running on http://localhost:1337</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Debug: Show number of frames */}
+        {!framesLoading && !framesError && (
+          <div className="mb-2 text-sm text-gray-500">
+            Showing {filteredAndSortedFrames.length} frames
+          </div>
+        )}
+        
+        {!framesLoading && !framesError && (
+          <div className="overflow-y-auto max-h-[600px] pr-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pb-4">
+              {filteredAndSortedFrames.map((frame) => (
               <div
                 key={frame.id}
                 className={`frame-card__container ${
@@ -242,9 +275,10 @@ const FramesTab: React.FC<FramesTabProps> = ({
                   )}
                 </div>
               </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Hide Unsuitable Frames */}

@@ -1,7 +1,20 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
-import { cmsApi, Product } from '../../lib/cms';
-import { getStrapiImageUrl } from '../../lib/cms';
+import { getStrapiImageUrl } from '../../hooks/useFrames';
+
+interface Product {
+  id: number;
+  attributes: {
+    name: string;
+    price: number;
+    status: 'in-stock' | 'sold-out' | 'limited' | 'trending';
+    slug: string;
+    image: any;
+    description?: string;
+    category?: string;
+    createdAt?: string;
+  };
+}
 
 interface ProductPageProps {
   product: Product | null;
@@ -61,9 +74,9 @@ export default function ProductPage({ product }: ProductPageProps) {
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     {product.attributes.name}
                   </h1>
-                  {product.attributes.category?.data && (
+                  {product.attributes.category && (
                     <p className="text-blue-600 font-medium">
-                      {product.attributes.category.data.attributes.name}
+                      {product.attributes.category}
                     </p>
                   )}
                 </div>
@@ -126,7 +139,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                     </div>
                     <div className="flex justify-between">
                       <span>Added:</span>
-                      <span>{new Date(product.attributes.createdAt).toLocaleDateString()}</span>
+                      <span>{product.attributes.createdAt ? new Date(product.attributes.createdAt).toLocaleDateString() : 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -139,44 +152,18 @@ export default function ProductPage({ product }: ProductPageProps) {
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const products = await cmsApi.getProducts();
-    const paths = products.map((product) => ({
-      params: { slug: product.id.toString() },
-    }));
+// TODO: Implement static generation when CMS API is available
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   return {
+//     paths: [],
+//     fallback: 'blocking',
+//   };
+// };
 
-    return {
-      paths,
-      fallback: 'blocking',
-    };
-  } catch (error) {
-    console.error('Error generating static paths:', error);
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-};
-
-export const getStaticProps: GetStaticProps<ProductPageProps> = async ({ params }) => {
-  try {
-    const slug = params?.slug as string;
-    const product = await cmsApi.getProduct(slug);
-
-    return {
-      props: {
-        product,
-      },
-      revalidate: 60, // Revalidate every 60 seconds
-    };
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    return {
-      props: {
-        product: null,
-      },
-      revalidate: 60,
-    };
-  }
-}; 
+// export const getStaticProps: GetStaticProps<ProductPageProps> = async ({ params }) => {
+//   return {
+//     props: {
+//       product: null,
+//     },
+//   };
+// }; 

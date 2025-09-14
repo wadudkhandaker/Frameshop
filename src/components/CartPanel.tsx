@@ -7,6 +7,7 @@ const CartPanel: React.FC = () => {
   const {
     items,
     isOpen,
+    isAnimating,
     closeCart,
     removeItem,
     updateQuantity,
@@ -23,12 +24,16 @@ const CartPanel: React.FC = () => {
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+        className={`fixed inset-0 bg-black z-40 transition-opacity duration-300 ${
+          isAnimating ? 'bg-opacity-50' : 'bg-opacity-0'
+        }`}
         onClick={closeCart}
       />
       
       {/* Cart Panel */}
-      <div className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out">
+      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-xl z-50 transform transition-transform duration-300 ease-out ${
+        isAnimating ? 'translate-x-0' : 'translate-x-full'
+      }`}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">

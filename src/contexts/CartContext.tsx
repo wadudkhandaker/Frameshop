@@ -13,6 +13,7 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   isOpen: boolean;
+  isAnimating: boolean;
   addItem: (item: Omit<CartItem, 'quantity'>) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -41,6 +42,7 @@ interface CartProviderProps {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [lastAddedItem, setLastAddedItem] = useState<CartItem | null>(null);
 
   const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
@@ -64,6 +66,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       }
     });
     setIsOpen(true);
+    // Start animation after a tiny delay to ensure DOM is updated
+    setTimeout(() => {
+      setIsAnimating(true);
+    }, 10);
   };
 
   const removeItem = (id: string) => {
@@ -88,8 +94,21 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setLastAddedItem(null);
   };
 
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
+  const openCart = () => {
+    setIsOpen(true);
+    // Start animation after a tiny delay to ensure DOM is updated
+    setTimeout(() => {
+      setIsAnimating(true);
+    }, 10);
+  };
+  
+  const closeCart = () => {
+    setIsAnimating(false);
+    // Close the panel after animation completes
+    setTimeout(() => {
+      setIsOpen(false);
+    }, 300);
+  };
 
   const getTotalItems = () => {
     return items.reduce((total, item) => total + item.quantity, 0);
@@ -104,6 +123,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const value: CartContextType = {
     items,
     isOpen,
+    isAnimating,
     addItem,
     removeItem,
     updateQuantity,

@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface ContactFormData {
   customer: string;
@@ -26,19 +28,10 @@ export default async function handler(
       });
     }
 
-    // Create transporter using Gmail SMTP
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER, // Your Gmail address
-        pass: process.env.GMAIL_APP_PASSWORD, // Your Gmail App Password
-      },
-    });
-
-    // Email configuration
-    const mailOptions = {
-      from: process.env.GMAIL_USER, // Sender email
-      to: 'ronniehaque@gmail.com', // Recipient email (fixed)
+    // Send email to admin
+    await resend.emails.send({
+      from: 'Contact Form <onboarding@resend.dev>',
+      to: 'ronniehaque@gmail.com',
       subject: `[Frameshop Contact] ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -66,27 +59,11 @@ export default async function handler(
           </div>
         </div>
       `,
-      text: `
-        New Contact Form Submission
-        
-        From: ${customer}
-        Subject: ${subject}
-        Date: ${new Date().toLocaleString()}
-        
-        Message:
-        ${message}
-        
-        Website: frameshop.com.au
-        IP: ${req.headers['x-forwarded-for'] || req.connection.remoteAddress}
-      `,
-    };
+    });
 
-    // Send email
-    await transporter.sendMail(mailOptions);
-
-    // Send confirmation email to customer (optional)
-    const confirmationMailOptions = {
-      from: process.env.GMAIL_USER,
+    // Send confirmation email to customer
+    await resend.emails.send({
+      from: 'Contact Form <onboarding@resend.dev>',
       to: customer,
       subject: 'Thank you for contacting Frameshop',
       html: `
@@ -110,10 +87,7 @@ export default async function handler(
           <a href="https://frameshop.com.au">frameshop.com.au</a></p>
         </div>
       `,
-    };
-
-    // Send confirmation email
-    await transporter.sendMail(confirmationMailOptions);
+    });
 
     res.status(200).json({ 
       success: true, 

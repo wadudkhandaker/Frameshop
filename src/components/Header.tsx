@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, Phone, ShoppingCart, User, Heart } from 'lucide-react';
+import CartButton from './CartButton';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,10 +41,7 @@ export default function Header() {
                 <Heart className="w-4 h-4 mr-1" />
                 <span>Favourites 0</span>
               </Link>
-              <Link href="/basket" className="flex items-center hover:text-gray-300 transition-colors">
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                <span>Basket 0</span>
-              </Link>
+              <CartButton />
             </div>
           </div>
         </div>

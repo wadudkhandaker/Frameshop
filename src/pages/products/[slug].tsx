@@ -7,6 +7,7 @@ import { useProduct, transformStrapiProduct } from '../../hooks/useProducts';
 import { mockTrendingProducts } from '../../data/mockProducts';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { useCart } from '../../contexts/CartContext';
 
 interface Product {
   id: string;
@@ -47,6 +48,7 @@ export default function ProductPage() {
   const router = useRouter();
   const { slug } = router.query;
   const { product: strapiProduct, loading, error } = useProduct(slug as string);
+  const { addItem } = useCart();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -178,8 +180,16 @@ Selected designs also feature specialty finishes, including:
   ];
 
   const handleAddToCart = () => {
-    // TODO: Implement add to cart functionality
-    console.log('Adding to cart:', product, 'quantity:', quantity);
+    if (product) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0] || '/images/placeholder.jpg',
+        slug: product.slug,
+        size: product.frame?.name || 'Standard'
+      });
+    }
   };
 
   const handleWishlist = () => {

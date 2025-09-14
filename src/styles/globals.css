@@ -9,3 +9,49 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Cart Panel Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.cart-panel-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.cart-panel-exit {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+/* Custom scrollbar for cart items */
+.cart-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cart-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.cart-scroll::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.cart-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

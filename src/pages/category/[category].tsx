@@ -88,7 +88,7 @@ export default function CategoryPage() {
 
       <main className="min-h-screen bg-gray-50">
         {/* Page Header */}
-        <section className="bg-white py-12">
+        {/* <section className="bg-white py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">{categoryName}</h1>
@@ -98,7 +98,7 @@ export default function CategoryPage() {
               </p>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Products Grid */}
         <section className="py-12">

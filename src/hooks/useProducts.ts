@@ -178,6 +178,54 @@ export const useProduct = (slug: string) => {
   return { product, loading, error };
 };
 
+// Hook to fetch products by category
+export const useProductsByCategory = (category: string) => {
+  const [products, setProducts] = useState<StrapiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProductsByCategory = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json'
+        };
+        if (STRAPI_TOKEN) {
+          headers['Authorization'] = `Bearer ${STRAPI_TOKEN}`;
+        }
+
+        const response = await fetch(`${STRAPI_URL}/api/products?filters[categories][$eq]=${category}&populate[images]=true&populate[frame]=true&populate[badges]=true&sort=name:asc`, {
+          headers
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data: StrapiResponse<StrapiProduct> = await response.json();
+        setProducts(data.data || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch products');
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (category && category.trim() !== '') {
+      fetchProductsByCategory();
+    } else {
+      setLoading(false);
+      setProducts([]);
+    }
+  }, [category]);
+
+  return { products, loading, error };
+};
+
 // Hook to fetch trending products only
 export const useTrendingProducts = () => {
   const [products, setProducts] = useState<StrapiProduct[]>([]);

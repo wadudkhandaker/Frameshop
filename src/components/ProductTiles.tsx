@@ -1,89 +1,103 @@
 import React from 'react';
 import Link from 'next/link';
 
-interface Tile {
+interface Product {
   id: string;
-  title: string;
-  subtitle: string;
-  image: string;
-  link: string;
+  name: string;
+  slug: string;
+  price: number;
+  status: string;
+  description?: string;
+  shortDescription?: string;
+  images: string[];
+  frame: {
+    id: string;
+    name: string;
+    code: string;
+    width: number;
+    depth: number;
+    rebate: number;
+    material: string;
+    color: string;
+    priceRate: number;
+    maxLength: number;
+    category: string;
+    isPopular: boolean;
+    isOnSale: boolean;
+  } | null;
 }
 
-const tiles: Tile[] = [
-  {
-    id: '1',
-    title: 'Become an Insider',
-    subtitle: 'SIGN-UP NOW',
-    image: 'https://officialmemorabiliaau.b-cdn.net/img/tiles/31-omhometileportraitsubscribe.jpg',
-    link: '/account-create'
-  },
-  {
-    id: '2',
-    title: 'BRITISH & IRISH LIONS',
-    subtitle: 'BUY NOW',
-    image: 'https://officialmemorabiliaau.b-cdn.net/img/tiles/32-bil-tile-update.jpg',
-    link: 'https://www.officialmemorabilia.com.au/worlds-best/british-irish-lions/'
-  },
-  {
-    id: '3',
-    title: 'PREMIERS JERSEY',
-    subtitle: 'BUY NOW',
-    image: 'https://officialmemorabiliaau.b-cdn.net/img/tiles/29-omhometilepanthersjerseyv4.jpg',
-    link: '/pre-order-penrith-panthers-2024-premiers-team-signed-jersey-5457.phtml'
-  },
-  {
-    id: '4',
-    title: 'VEGAS HELMETS',
-    subtitle: 'BUY NOW',
-    image: 'https://officialmemorabiliaau.b-cdn.net/img/tiles/30-helmetsmobilev3.jpg',
-    link: '/nrl/'
-  },
-  {
-    id: '5',
-    title: 'QUEENSLAND MAROONS',
-    subtitle: 'BUY NOW',
-    image: 'https://officialmemorabiliaau.b-cdn.net/img/tiles/28-qld-homepage-tile.jpg',
-    link: 'https://www.officialmemorabilia.com.au/nrl/queensland-maroons/'
-  },
-  {
-    id: '6',
-    title: 'Live Auction',
-    subtitle: 'BID NOW',
-    image: 'https://officialmemorabiliaau.b-cdn.net/img/tiles/33-om-homepage-auction.jpg',
-    link: 'https://auctions.officialmemorabilia.com.au/'
-  }
-];
+interface ProductTilesProps {
+  products: Product[];
+}
 
-export default function ProductTiles() {
+export default function ProductTiles({ products }: ProductTilesProps) {
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">No products found.</p>
+      </div>
+    );
+  }
+
   return (
-    <section className="tiles py-12 bg-gray-50">
+    <section className="products py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tiles.map((tile) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.map((product) => (
             <Link 
-              key={tile.id} 
-              href={tile.link}
-              className="tile group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              key={product.id} 
+              href={`/products/${product.slug}`}
+              className="product-card group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-white"
             >
-              <div 
-                className="imageBG w-full h-64 bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-110"
-                style={{ backgroundImage: `url(${tile.image})` }}
-              />
-              
-              <div className="overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6">
-                <h3 className="text-white">
-                  <span className="mainText block text-xl font-bold mb-1">{tile.title}</span>
-                  <span className="inlineSummary text-sm opacity-90">{tile.subtitle}</span>
-                </h3>
-                <span className="submit submitSecondary text-white text-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  Explore {tile.link}
-                </span>
+              {/* Product Image */}
+              <div className="relative h-64 overflow-hidden">
+                <img 
+                  src={product.images[0] || '/images/placeholder.jpg'}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                
+                {/* Status Badge */}
+                <div className="absolute top-3 left-3">
+                  {product.status === 'limited' && (
+                    <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
+                      LIMITED
+                    </span>
+                  )}
+                  {product.status === 'in-stock' && (
+                    <span className="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">
+                      IN STOCK
+                    </span>
+                  )}
+                  {product.status === 'out-of-stock' && (
+                    <span className="bg-gray-600 text-white px-2 py-1 rounded text-xs font-bold">
+                      OUT OF STOCK
+                    </span>
+                  )}
+                </div>
               </div>
               
-              <div className="overlayHover absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <span className="submit submitSecondary text-white font-semibold">
-                  Explore {tile.link}
-                </span>
+              {/* Product Info */}
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  {product.name}
+                </h3>
+                
+                {product.frame && (
+                  <p className="text-sm text-gray-600 mb-2">
+                    {product.frame.material} {product.frame.color} Frame
+                  </p>
+                )}
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-xl font-bold text-red-600">
+                    ${product.price}.00
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    View Details →
+                  </span>
+                </div>
               </div>
             </Link>
           ))}

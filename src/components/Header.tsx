@@ -7,21 +7,21 @@ export default function Header() {
 
   const menuItems = [
     { name: 'Frame Builder', href: '/frame-builder', isPrimary: true },
-    { name: 'Gallery', href: '/gallery' },
-    { name: 'Sports Memorabilia', href: '/sports-memorabilia', submenu: [
-      { name: 'Rugby', href: '/sports-memorabilia/rugby' },
-      { name: 'Soccer', href: '/sports-memorabilia/soccer' },
-      { name: 'Tennis', href: '/sports-memorabilia/tennis' },
-      { name: 'Cricket', href: '/sports-memorabilia/cricket' },
-      { name: 'Basketball', href: '/sports-memorabilia/basketball' }
+    { name: 'Sports Memorabilia', href: '/category/sports-memorabilia', submenu: [
+      { name: 'Rugby', href: '/category/rugby' },
+      { name: 'Soccer', href: '/category/soccer' },
+      { name: 'Tennis', href: '/category/tennis' },
+      { name: 'Cricket', href: '/category/cricket' },
+      { name: 'Basketball', href: '/category/basketball' }
     ]},
     { name: 'Specials', href: '/specials', submenu: [
-      { name: 'Sports Memorabilia', href: '/specials/sports-memorabilia' },
-      { name: 'Canvas Artworks', href: '/specials/canvas-artworks' }
+      { name: 'Sports Memorabilia', href: '/category/sports-memorabilia' },
+      { name: 'Canvas Artworks', href: '/category/canvas-artworks' }
     ]},
     { name: 'Charity Auctions', href: '/charity-auctions' },
     { name: 'Pick up & Delivery', href: '/pickup-delivery' },
-    { name: 'Contact Us', href: '/contact' }
+    { name: 'Contact Us', href: '/contact' },
+    { name: 'Gallery', href: '/gallery' }
   ];
 
   return (

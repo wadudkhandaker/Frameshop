@@ -7,6 +7,7 @@ export default function Header() {
 
   const menuItems = [
     { name: 'Frame Builder', href: '/frame-builder', isPrimary: true },
+    { name: 'Gallery', href: '/gallery' },
     { name: 'Sports Memorabilia', href: '/sports-memorabilia', submenu: [
       { name: 'Rugby', href: '/sports-memorabilia/rugby' },
       { name: 'Soccer', href: '/sports-memorabilia/soccer' },

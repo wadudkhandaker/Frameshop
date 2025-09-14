@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Search, Star, DollarSign, ChevronDown, Info, ChevronLeft, ChevronRight, Palette, Crown, Zap, Heart, Sparkles, Gem, TreePine, Home, Clock, Award, Coffee, Sun, Moon, Waves, Flower2, Diamond, Shield } from 'lucide-react';
 import { Frame, SortOption } from './types';
 import { sortOptions, categories } from './data';
@@ -215,11 +216,13 @@ const FramesTab: React.FC<FramesTabProps> = ({
                 >
                   <div className="frame-card__main">
                     <div className="relative">
-                      <img
-                        src={frame.image}
-                        alt={`Frame ${frame.code}`}
-                        className="frame-image w-full h-28 object-cover rounded-t-lg"
-                      />
+                      <Link href={`/products/${frame.id}`}>
+                        <img
+                          src={frame.image}
+                          alt={`Frame ${frame.code}`}
+                          className="frame-image w-full h-28 object-cover rounded-t-lg cursor-pointer hover:opacity-90 transition-opacity duration-200"
+                        />
+                      </Link>
                       {frame.isOnSale && (
                         <div className="absolute top-1 left-1 bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-semibold">
                           Sale

@@ -4,7 +4,6 @@ import Header from '@/components/Header';
 import HomeSlider from '@/components/HomeSlider';
 import TrendingProducts from '@/components/TrendingProducts';
 import ProductTiles from '@/components/ProductTiles';
-import LiveAuctions from '@/components/LiveAuctions';
 import TrustedSection from '@/components/TrustedSection';
 import AboutSection from '@/components/AboutSection';
 import Divider from '@/components/Divider';
@@ -61,9 +60,6 @@ export default function Home() {
           
           {/* Product Tiles */}
           <ProductTiles />
-          
-          {/* Live Auctions */}
-          <LiveAuctions />
           
           {/* Divider */}
           <Divider />

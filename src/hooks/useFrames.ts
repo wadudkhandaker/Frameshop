@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 export interface StrapiFrame {
   id: number;
   documentId: string;
+  name?: string; // Added name field
   code: string;
   width: number;
   depth: number;
@@ -13,21 +14,75 @@ export interface StrapiFrame {
   isPopular: boolean;
   isOnSale: boolean;
   category: string;
-  maxLength?: number;
+  maxLength?: number | null; // Can be null
   description?: string;
+  frameType?: string; // Added frameType field
   image?: Array<{
     id: number;
     documentId: string;
     name: string;
-    alternativeText?: string;
-    url: string;
+    alternativeText?: string | null;
+    caption?: string | null;
+    width: number;
+    height: number;
     formats?: {
-      thumbnail?: { url: string };
-      small?: { url: string };
-      medium?: { url: string };
-      large?: { url: string };
+      thumbnail?: {
+        name: string;
+        hash: string;
+        ext: string;
+        mime: string;
+        width: number;
+        height: number;
+        size: number;
+        sizeInBytes: number;
+        url: string;
+      };
+      small?: {
+        name: string;
+        hash: string;
+        ext: string;
+        mime: string;
+        width: number;
+        height: number;
+        size: number;
+        sizeInBytes: number;
+        url: string;
+      };
+      medium?: {
+        name: string;
+        hash: string;
+        ext: string;
+        mime: string;
+        width: number;
+        height: number;
+        size: number;
+        sizeInBytes: number;
+        url: string;
+      };
+      large?: {
+        name: string;
+        hash: string;
+        ext: string;
+        mime: string;
+        width: number;
+        height: number;
+        size: number;
+        sizeInBytes: number;
+        url: string;
+      };
     };
-  }>;
+    hash: string;
+    ext: string;
+    mime: string;
+    size: number;
+    url: string;
+    previewUrl?: string | null;
+    provider: string;
+    provider_metadata?: any;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+  }> | null; // Can be null
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
@@ -140,6 +195,56 @@ export const useFrameCategories = () => {
   }, []);
 
   return { categories, loading, error };
+};
+
+// Hook to fetch a single frame by ID
+export const useFrame = (id: string) => {
+  const [frame, setFrame] = useState<StrapiFrame | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFrame = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json'
+        };
+        if (STRAPI_TOKEN) {
+          headers['Authorization'] = `Bearer ${STRAPI_TOKEN}`;
+        }
+
+        const response = await fetch(`${STRAPI_URL}/api/frames/${id}?populate=image`, {
+          headers
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data: StrapiResponse<StrapiFrame> = await response.json();
+        
+        if (data.data && data.data.length > 0) {
+          setFrame(data.data[0]);
+        } else {
+          setFrame(null);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch frame');
+        setFrame(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchFrame();
+    }
+  }, [id]);
+
+  return { frame, loading, error };
 };
 
 // Helper function to get image URL

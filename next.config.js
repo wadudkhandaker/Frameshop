@@ -2,15 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  // Enable static export for GitHub Pages
-  output: 'export',
+  // Dynamic site with Strapi CMS - no static export needed
   trailingSlash: true,
-  // Ensure CSS is properly handled
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/Frameshop' : '',
-  basePath: process.env.NODE_ENV === 'production' ? '/Frameshop' : '',
   images: {
-    unoptimized: true, // Required for static export
-    domains: ['images.pexels.com'],
+    domains: ['images.pexels.com', 'localhost'], // Added localhost for Strapi images
     formats: ['image/webp', 'image/avif'],
   },
   // Enable compression

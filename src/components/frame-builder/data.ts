@@ -567,22 +567,22 @@ export const frames: Frame[] = [
 ];
 
 export const standardSizes: StandardSize[] = [
-  { label: '4" x 6" (10.2 x 15.2 cm)', width: 10.2, height: 15.2 },
-  { label: '5" x 7" (12.7 x 17.8 cm)', width: 12.7, height: 17.8 },
-  { label: '6" x 8" (15.2 x 20.3 cm)', width: 15.2, height: 20.3 },
-  { label: '8" x 10" (20.3 x 25.4 cm)', width: 20.3, height: 25.4 },
-  { label: '8" x 12" (20.3 x 30.5 cm)', width: 20.3, height: 30.5 },
-  { label: '11" x 14" (27.9 x 35.6 cm)', width: 27.9, height: 35.6 },
-  { label: '12" x 16" (30.5 x 40.6 cm)', width: 30.5, height: 40.6 },
-  { label: '16" x 20" (40.6 x 50.8 cm)', width: 40.6, height: 50.8 },
-  { label: '16" x 24" (40.6 x 61.0 cm)', width: 40.6, height: 61.0 },
-  { label: '18" x 24" (45.6 x 61.0 cm)', width: 45.6, height: 61.0 },
-  { label: 'A5 (14.8 x 21.0 cm)', width: 14.8, height: 21.0 },
-  { label: 'A4 (21.0 x 29.7 cm)', width: 21.0, height: 29.7 },
-  { label: 'A3 (29.7 x 42.0 cm)', width: 29.7, height: 42.0 },
-  { label: 'A2 (42.0 x 59.4 cm)', width: 42.0, height: 59.4 },
-  { label: 'A1 (59.4 x 84.1 cm)', width: 59.4, height: 84.1 },
-  { label: 'A0 (84.1 x 118.9 cm)', width: 84.1, height: 118.9 },
+  { label: '4" x 6" (10.2 x 15.2 cm)', width: 10.2, height: 15.2, widthInch: 4, heightInch: 6 },
+  { label: '5" x 7" (12.7 x 17.8 cm)', width: 12.7, height: 17.8, widthInch: 5, heightInch: 7 },
+  { label: '6" x 8" (15.2 x 20.3 cm)', width: 15.2, height: 20.3, widthInch: 6, heightInch: 8 },
+  { label: '8" x 10" (20.3 x 25.4 cm)', width: 20.3, height: 25.4, widthInch: 8, heightInch: 10 },
+  { label: '8" x 12" (20.3 x 30.5 cm)', width: 20.3, height: 30.5, widthInch: 8, heightInch: 12 },
+  { label: '11" x 14" (27.9 x 35.6 cm)', width: 27.9, height: 35.6, widthInch: 11, heightInch: 14 },
+  { label: '12" x 16" (30.5 x 40.6 cm)', width: 30.5, height: 40.6, widthInch: 12, heightInch: 16 },
+  { label: '16" x 20" (40.6 x 50.8 cm)', width: 40.6, height: 50.8, widthInch: 16, heightInch: 20 },
+  { label: '16" x 24" (40.6 x 61.0 cm)', width: 40.6, height: 61.0, widthInch: 16, heightInch: 24 },
+  { label: '18" x 24" (45.6 x 61.0 cm)', width: 45.6, height: 61.0, widthInch: 18, heightInch: 24 },
+  { label: 'A5 (14.8 x 21.0 cm)', width: 14.8, height: 21.0, widthInch: 5.8, heightInch: 8.3 },
+  { label: 'A4 (21.0 x 29.7 cm)', width: 21.0, height: 29.7, widthInch: 8.3, heightInch: 11.7 },
+  { label: 'A3 (29.7 x 42.0 cm)', width: 29.7, height: 42.0, widthInch: 11.7, heightInch: 16.5 },
+  { label: 'A2 (42.0 x 59.4 cm)', width: 42.0, height: 59.4, widthInch: 16.5, heightInch: 23.4 },
+  { label: 'A1 (59.4 x 84.1 cm)', width: 59.4, height: 84.1, widthInch: 23.4, heightInch: 33.1 },
+  { label: 'A0 (84.1 x 118.9 cm)', width: 84.1, height: 118.9, widthInch: 33.1, heightInch: 46.8 },
 ];
 
 export const matBoards: MatBoard[] = [

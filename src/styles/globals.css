@@ -2,6 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Full page background color */
+html, body {
+  background-color: #E5E5E5;
+}
+
+/* FrameShop.com.au specific styles */
+.frame-card__container {
+  @apply mb-4;
+}
+
+.frame-card {
+  @apply bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md;
+}
+
+.frame-card--selected {
+  @apply border-blue-600 bg-blue-50;
+}
+
+.frame-card__main {
+  @apply p-4 text-center;
+}
+
+.frame-image-container {
+  @apply flex justify-center mb-3;
+}
+
+.frame-preview {
+  @apply flex items-center justify-center;
+}
+
+.frame-card__code {
+  @apply font-semibold text-sm text-gray-800 mb-1;
+}
+
+.frame-card__size {
+  @apply text-xs text-gray-600 mb-1;
+}
+
+.frame-card__rate {
+  @apply text-xs text-gray-500;
+}
+
+.frame-card__info {
+  @apply bg-gray-50 border-t border-gray-200 max-h-0 overflow-hidden transition-all duration-300;
+}
+
+.frame-card__info--expanded {
+  @apply max-h-96 p-4;
+}
+
+.frame-card__info__table {
+  @apply w-full text-xs;
+}
+
+.frame-card__info__table .title {
+  @apply font-semibold text-center py-2 bg-gray-100;
+}
+
+.frame-card__info__table td {
+  @apply py-1 px-2 border-b border-gray-200;
+}
+
+.frame-card__info__table td:first-child {
+  @apply font-medium text-gray-700;
+}
+
+.frame-card__info__table td:last-child {
+  @apply text-gray-600;
+}
+
 /* Custom utilities */
 .line-clamp-2 {
   display: -webkit-box;

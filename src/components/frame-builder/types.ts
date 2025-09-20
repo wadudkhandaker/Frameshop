@@ -1,6 +1,7 @@
 export interface Frame {
   id: string;
   code: string;
+  name?: string;
   width: number;
   depth: number;
   rebate: number;
@@ -8,7 +9,7 @@ export interface Frame {
   color: string;
   priceRate: number;
   category: string[];
-  image: string;
+  image?: string;
   isPopular?: boolean;
   isOnSale?: boolean;
   maxLength?: number;
@@ -41,3 +42,25 @@ export type ImageOverlap = 'PHOTO' | 'EXACT';
 export type MatCategory = 'white-core' | 'black-core' | 'museum';
 export type MatWidthType = 'uniform' | 'custom';
 export type Units = 'cm' | 'inch';
+
+export interface StandardSize {
+  name: string;
+  width: number;
+  height: number;
+  widthInch: number;
+  heightInch: number;
+}
+
+export interface CustomOrder {
+  width: number;
+  height: number;
+  units: 'cm' | 'inch';
+  frame: Frame | null;
+  image: File | null;
+  matting: boolean;
+  glass: string;
+  backing: string;
+  hanger: string;
+  quantity: number;
+  bulkOption?: number;
+}

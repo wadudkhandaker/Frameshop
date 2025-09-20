@@ -342,7 +342,7 @@ Selected designs also feature specialty finishes, including:
                   </div>
 
                   {/* Social Share Buttons */}
-                  <div className="shareButtons mt-6">
+                  {/* <div className="shareButtons mt-6">
                     <ul className="flex space-x-4">
                       <li>
                         <a
@@ -375,7 +375,7 @@ Selected designs also feature specialty finishes, including:
                         </a>
                       </li>
                     </ul>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -441,14 +441,14 @@ Selected designs also feature specialty finishes, including:
                 </div>
 
                   {/* Reviews */}
-                  <div className="mb-6">
+                  {/* <div className="mb-6">
                     <div className="flex items-center space-x-2">
                       <div className="flex text-yellow-400">
                         {'★'.repeat(5)}
                       </div>
                       <span className="text-gray-600">15 Reviews</span>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Quantity and Add to Cart */}
                   <div className="mainQtyWrapper flex items-center space-x-4 mb-6">
@@ -482,7 +482,7 @@ Selected designs also feature specialty finishes, including:
                       <span>Add to Cart</span>
                     </button>
                     
-                    <button
+                    {/* <button
                       onClick={handleWishlist}
                       className={`p-3 rounded-lg border transition-colors duration-200 ${
                         isWishlisted
@@ -491,18 +491,18 @@ Selected designs also feature specialty finishes, including:
                       }`}
                     >
                       <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-                  </button>
+                  </button> */}
                 </div>
 
                   {/* Payment Plan */}
-                  <div className="mb-8 p-4 bg-gray-100 rounded-lg">
+                  {/* <div className="mb-8 p-4 bg-gray-100 rounded-lg">
                     <p className="text-sm text-gray-600">
                       {product.financingInfo || 'Or up to 6 months interest free. Fees apply.'}
                     </p>
                     <div className="mt-2">
                       <span className="text-xs text-blue-600">ⓘ</span>
                     </div>
-                    </div>
+                    </div> */}
 
                   {/* Product Description */}
                   <div className="content">

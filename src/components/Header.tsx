@@ -37,10 +37,10 @@ export default function Header() {
               </Link>
             </div>
             <div className="flex items-center space-x-6">
-              <Link href="/favourites" className="flex items-center hover:text-gray-300 transition-colors">
+              {/* <Link href="/favourites" className="flex items-center hover:text-gray-300 transition-colors">
                 <Heart className="w-4 h-4 mr-1" />
                 <span>Favourites 0</span>
-              </Link>
+              </Link> */}
               <CartButton />
             </div>
           </div>

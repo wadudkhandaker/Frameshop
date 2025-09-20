@@ -10,8 +10,8 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Useful Links</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/login" className="hover:text-white transition-colors">Login</Link></li>
-              <li><Link href="/register" className="hover:text-white transition-colors">Register</Link></li>
+              {/* <li><Link href="/login" className="hover:text-white transition-colors">Login</Link></li>
+              <li><Link href="/register" className="hover:text-white transition-colors">Register</Link></li> */}
               <li><Link href="/ordering-online" className="hover:text-white transition-colors">Ordering Online</Link></li>
               <li><Link href="/mobile-terms" className="hover:text-white transition-colors">Mobile Terms of Service</Link></li>
               <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
@@ -22,7 +22,7 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Shop Assistant</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/reviews" className="hover:text-white transition-colors">Reviews</Link></li>
+              {/* <li><Link href="/reviews" className="hover:text-white transition-colors">Reviews</Link></li> */}
               <li><Link href="/returns-exchanges" className="hover:text-white transition-colors">Returns & Exchanges</Link></li>
               <li><Link href="/payment-options" className="hover:text-white transition-colors">Payment Options</Link></li>
               <li><Link href="/contact-us" className="hover:text-white transition-colors">Contact Us</Link></li>
@@ -71,8 +71,7 @@ export default function Footer() {
         
         {/* Copyright */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2025 SE Products Trading as Official Memorabilia. All Rights Reserved.</p>
-          <p className="mt-2 text-sm">eCommerce by</p>
+          <p>&copy; 2025 PICTURE PERFECT AUSTRALIA PTY LTD. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

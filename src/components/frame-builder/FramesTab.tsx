@@ -1,9 +1,7 @@
-import React, { useMemo, useState } from 'react';
-import Link from 'next/link';
-import { Search, Star, DollarSign, ChevronDown, Info, ChevronLeft, ChevronRight, Palette, Crown, Zap, Heart, Sparkles, Gem, TreePine, Home, Clock, Award, Coffee, Sun, Moon, Waves, Flower2, Diamond, Shield } from 'lucide-react';
-import { Frame, SortOption } from './types';
-import { sortOptions, categories } from './data';
-import { useFrameCategories } from '../../hooks/useFrames';
+import React, { useMemo } from 'react';
+import { Search, Star, DollarSign, Info, Palette, Crown, Zap, Heart, Sparkles, Gem, TreePine, Home, Clock, Award, Coffee, Sun, Moon, Waves, Flower2, Diamond, Shield } from 'lucide-react';
+import { Frame } from './types';
+import { categories } from './data';
 import { FrameCard } from './FrameCard';
 
 interface FramesTabProps {
@@ -143,7 +141,7 @@ const FramesTab: React.FC<FramesTabProps> = ({
       {/* Category Tabs */}
       <div className="mb-6">
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
+          {categories.filter(category => category.name !== 'All').map((category) => (
             <button
               key={category.name}
               onClick={() => setActiveCategory(category.name)}

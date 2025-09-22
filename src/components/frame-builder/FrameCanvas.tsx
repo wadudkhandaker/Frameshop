@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Frame } from '../types';
+import { Frame, MatBoard } from '../types';
 
 interface FrameCanvasProps {
   width: number;
@@ -8,6 +8,8 @@ interface FrameCanvasProps {
   frame: Frame | null;
   image: string | null;
   matting: boolean;
+  selectedMatBoard: MatBoard | null;
+  matWidth: number;
   className?: string;
 }
 
@@ -18,6 +20,8 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
   frame,
   image,
   matting,
+  selectedMatBoard,
+  matWidth,
   className = ''
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -148,10 +152,15 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
       ctx.fillRect(logoX + logoSize * 0.4, logoY + logoSize * 0.4, logoSize * 0.6, logoSize * 0.6);
     }
 
+    // Draw mat board if selected
+    if (matting && selectedMatBoard) {
+      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard);
+    }
+
     // Draw size information like frameshop.com.au
     drawSizeInfo(ctx, imageX, imageY, displayWidth, displayHeight, width, height, units, frame);
 
-  }, [width, height, units, frame, image, matting]);
+  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth]);
 
   const drawWoodGradientInnerShadow = (
     ctx: CanvasRenderingContext2D,
@@ -224,6 +233,47 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     
     ctx.restore();
   };
+
+const drawMatBoard = (
+  ctx: CanvasRenderingContext2D,
+  frameX: number,
+  frameY: number,
+  totalFrameWidth: number,
+  totalFrameHeight: number,
+  frameWidth: number,
+  matWidth: number,
+  matBoard: MatBoard
+) => {
+  // Calculate mat board dimensions
+  const matWidthPixels = matWidth * 50; // Convert cm to pixels
+  const matX = frameX + frameWidth;
+  const matY = frameY + frameWidth;
+  const matW = totalFrameWidth - (frameWidth * 2);
+  const matH = totalFrameHeight - (frameWidth * 2);
+
+  // Draw mat board background
+  ctx.fillStyle = matBoard.color;
+  ctx.fillRect(matX, matY, matW, matH);
+
+  // Draw inner cutout for image
+  const imageAreaX = matX + matWidthPixels;
+  const imageAreaY = matY + matWidthPixels;
+  const imageAreaW = matW - (matWidthPixels * 2);
+  const imageAreaH = matH - (matWidthPixels * 2);
+  
+  ctx.clearRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
+
+  // Add subtle shadow around the mat opening
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
+  ctx.restore();
+};
 
 const drawWoodenFrame = (
   ctx: CanvasRenderingContext2D,

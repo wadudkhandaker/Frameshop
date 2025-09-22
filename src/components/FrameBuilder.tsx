@@ -146,28 +146,34 @@ const FrameBuilder: React.FC = () => {
       </div>
 
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="columns is-desktop">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Canvas Preview */}
-          <div id="product-preview" className="column sticky top-8">
-            <div className="overlay-container" id="canvas-container">
-              <div className="frame-engine__container" id="main-canvas">
-                <div className="frame-engine__loading-anchor">
-                  <FrameCanvas
-                    width={parseFloat(imageWidth) || 0}
-                    height={parseFloat(imageHeight) || 0}
-                    units={units}
-                    frame={selectedFrame}
-                    image={uploadedImage}
-                    matting={selectedMatBoard !== null}
-                    className="w-full"
-                  />
-                </div>
-              </div>
+          <div className="order-2 lg:order-1">
+            <div className="sticky top-8">
+              <FrameCanvas
+                width={parseFloat(imageWidth) || 0}
+                height={parseFloat(imageHeight) || 0}
+                units={units}
+                frame={selectedFrame}
+                image={uploadedImage}
+                matting={selectedMatBoard !== null}
+                selectedMatBoard={selectedMatBoard}
+                matWidth={matWidthType === 'uniform' 
+                  ? parseFloat(uniformWidth) || 5
+                  : Math.max(
+                      parseFloat(customWidths.top) || 5,
+                      parseFloat(customWidths.bottom) || 5,
+                      parseFloat(customWidths.left) || 5,
+                      parseFloat(customWidths.right) || 5
+                    )
+                }
+                className="w-full"
+              />
             </div>
           </div>
 
           {/* Right Column - Controls */}
-          <div className="column is-half-desktop">
+          <div className="order-1 lg:order-2">
             {/* Mobile Tour Button */}
             <div className="flex justify-center mb-2 md:hidden">
               <button className="btn btn-warning btn-tour-init mobile-tour-button w-40">
@@ -177,147 +183,126 @@ const FrameBuilder: React.FC = () => {
             </div>
 
             {/* Dimensions Section */}
-            <section className="card dimensions mb-6" id="dimensions">
-              <div className="columns is-desktop">
-                <div id="dimensions-column" className="column">
-                  <div className="dimensions__sizing">
-                    {/* Upload Section */}
-                    <div className="field is-grouped is-horizontal mb-4" style={{alignItems: 'center'}}>
-                      <h4 className="field-label text-lg font-semibold">Printing (Optional)</h4>
-                      <div id="uploads-column" className="field-body">
-                        <ImageUploader
-                          uploadedImage={uploadedImage}
-                          setUploadedImage={setUploadedImage}
-                          onImageProcessed={setProcessedImageData}
+            <section className="bg-white rounded-lg shadow-sm p-6 mb-6">
+              <div className="space-y-6">
+                {/* Upload Section */}
+                <div className="flex items-center space-x-4">
+                  <h4 className="text-lg font-semibold text-gray-800 whitespace-nowrap">Printing (Optional)</h4>
+                  <ImageUploader
+                    uploadedImage={uploadedImage}
+                    setUploadedImage={setUploadedImage}
+                    onImageProcessed={setProcessedImageData}
+                  />
+                </div>
+
+                {/* Units Selection */}
+                <div className="flex items-center space-x-4">
+                  <h4 className="text-lg font-semibold text-gray-800 whitespace-nowrap">Units</h4>
+                  <div className="flex space-x-4">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        value="cm" 
+                        checked={units === 'cm'}
+                        onChange={(e) => setUnits(e.target.value as Units)}
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">cm</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        value="inch" 
+                        checked={units === 'inch'}
+                        onChange={(e) => setUnits(e.target.value as Units)}
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">inch</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Image Size */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4">Image Size</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-end space-x-2">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">WIDTH</label>
+                        <input 
+                          type="number" 
+                          step="0.1" 
+                          min="1" 
+                          max="999.99"
+                          value={imageWidth}
+                          onChange={(e) => setImageWidth(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
-                    </div>
-
-                    {/* Units Selection */}
-                    <div className="field is-grouped is-horizontal mb-4" style={{alignItems: 'center'}}>
-                      <h4 className="field-label text-lg font-semibold">Units</h4>
-                      <div className="field-body">
-                        <div className="field is-grouped" style={{alignItems: 'center'}}>
-                          <label className="material-radio">
-                            <input 
-                              type="radio" 
-                              value="cm" 
-                              checked={units === 'cm'}
-                              onChange={(e) => setUnits(e.target.value as Units)}
-                            />
-                            <span className="outer">
-                              <span className="inner"></span>
-                            </span>
-                            <span className="material-radio__label">cm</span>
-                          </label>
-                          <label className="material-radio">
-                            <input 
-                              type="radio" 
-                              value="inch" 
-                              checked={units === 'inch'}
-                              onChange={(e) => setUnits(e.target.value as Units)}
-                            />
-                            <span className="outer">
-                              <span className="inner"></span>
-                            </span>
-                            <span className="material-radio__label">inch</span>
-                          </label>
-                        </div>
+                      <span className="text-gray-500 mb-2">×</span>
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">HEIGHT</label>
+                        <input 
+                          type="number" 
+                          step="0.1" 
+                          min="1" 
+                          max="999.99"
+                          value={imageHeight}
+                          onChange={(e) => setImageHeight(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
                       </div>
+                      <span className="text-sm text-gray-500 mb-2">{units}</span>
                     </div>
-
-                    {/* Image Size */}
-                    <div className="field is-grouped is-horizontal dimensions__size mb-4" style={{alignItems: 'flex-start'}}>
-                      <h4 className="field-label text-lg font-semibold">Image Size</h4>
-                      <div className="field-body" style={{flexDirection: 'column'}}>
-                        <div className="field is-grouped">
-                          <div className="columns w-full">
-                            <div className="column flex">
-                              <div className="field">
-                                <label className="label text-sm font-medium">WIDTH</label>
-                                <div className="control">
-                                  <input 
-                                    type="number" 
-                                    step="0.1" 
-                                    min="1" 
-                                    max="999.99"
-                                    value={imageWidth}
-                                    onChange={(e) => setImageWidth(e.target.value)}
-                                    className="input"
-                                  />
-                                </div>
-                              </div>
-                              <span className="mid mx-2 self-end">×</span>
-                              <div className="field">
-                                <label className="label text-sm font-medium">HEIGHT</label>
-                                <div className="control">
-                                  <input 
-                                    type="number" 
-                                    step="0.1" 
-                                    min="1" 
-                                    max="999.99"
-                                    value={imageHeight}
-                                    onChange={(e) => setImageHeight(e.target.value)}
-                                    className="input"
-                                  />
-                                </div>
-                              </div>
-                              <span className="mid ml-2 self-end">{units}</span>
-                            </div>
-                            <div className="column flex items-end">
-                              <div className="select is-fullwidth">
-                                <select 
-                                  value={selectedStandardSize}
-                                  onChange={(e) => handleStandardSizeSelect(e.target.value)}
-                                  className="w-full"
-                                >
-                                  <option value="">Standard Sizes</option>
-                                  {standardSizes && standardSizes.map((size) => (
-                                    <option key={size.label} value={size.label}>
-                                      {size.label}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="size-help text-sm text-gray-600 mb-2">
-                          Min: 10 × 10 cm, Max: 101.5 × 152.5 cm
-                        </div>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Standard Sizes</label>
+                      <select 
+                        value={selectedStandardSize}
+                        onChange={(e) => handleStandardSizeSelect(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select standard size</option>
+                        {standardSizes && standardSizes.map((size) => (
+                          <option key={size.label} value={size.label}>
+                            {size.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
+                  </div>
+                  <div className="text-sm text-gray-600 mt-2">
+                    Min: 10 × 10 cm, Max: 101.5 × 152.5 cm
                   </div>
                 </div>
               </div>
             </section>
 
             {/* Tab Picker */}
-            <div className="tab-picker">
-              <ul className="tab-list flex border-b border-gray-200">
-                {[
-                  { id: 'frames', label: 'Frames' },
-                  { id: 'mats', label: 'Mats' },
-                  { id: 'glass', label: 'Glass & Backing' },
-                  { id: 'printing', label: 'Printing' },
-                  { id: 'extras', label: 'Extras' }
-                ].map((tab) => (
-                  <li key={tab.id} className="tab-item">
-                    <span 
-                      className={`px-4 py-2 cursor-pointer transition-colors ${
+            <div className="bg-white rounded-lg shadow-sm">
+              <ul className="flex border-b border-gray-200">
+                  {[
+                    { id: 'frames', label: 'Frames' },
+                    { id: 'mats', label: 'Mats' },
+                    { id: 'glass', label: 'Glass & Backing' },
+                    { id: 'printing', label: 'Printing' },
+                    { id: 'extras', label: 'Extras' }
+                  ].map((tab) => (
+                  <li key={tab.id} className="flex-1">
+                    <button
+                      className={`w-full px-4 py-3 text-sm font-medium transition-colors ${
                         activeTab === tab.id 
-                          ? 'current-tab border-b-2 border-blue-500 text-blue-600 font-semibold' 
-                          : 'text-gray-600 hover:text-gray-800'
+                          ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50' 
+                          : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                       }`}
                       onClick={() => setActiveTab(tab.id as TabType)}
                     >
                       {tab.label}
-                    </span>
+                    </button>
                   </li>
-                ))}
+                  ))}
               </ul>
 
-              <div className="card tab-picker__body p-6">
+              <div className="p-6">
                 {activeTab === 'frames' && (
                   <FramesTab
                     selectedFrame={selectedFrame}
@@ -389,87 +374,85 @@ const FrameBuilder: React.FC = () => {
             </div>
 
             {/* Checkout Section */}
-            <div id="fs-checkout-box" className="card mt-6">
-              <div className="column field is-grouped is-horizontal p-0" style={{flexDirection: 'column'}}>
-                <div className="flex items-baseline mb-4">
-                  <label id="quantity-label" htmlFor="bulk_option" className="pr-1">
+            <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+              <div className="space-y-4">
+                {/* Bulk Buy */}
+                <div className="flex items-center space-x-3">
+                  <label htmlFor="bulk_option" className="text-sm font-medium text-gray-700 whitespace-nowrap">
                     Bulk Buy:
                   </label>
-                  <div className="select ml-1">
-                    <select 
-                      name="bulk_option" 
-                      id="bulk_option" 
-                      value={bulkOption}
-                      onChange={(e) => setBulkOption(e.target.value)}
-                      className="w-full"
-                    >
-                      <option value="">Select a pack size</option>
-                      <option value="10">Pack of 10 @ $15.12 each - Save 10%</option>
-                      <option value="25">Pack of 25 @ $14.28 each - Save 15%</option>
-                      <option value="50">Pack of 50 @ $13.44 each - Save 20%</option>
-                      <option value="100">Pack of 100 @ $12.60 each - Save 25%</option>
-                      <option value="200">Pack of 200 @ $11.76 each - Save 30%</option>
-                    </select>
-                  </div>
+                  <select 
+                    name="bulk_option" 
+                    id="bulk_option" 
+                    value={bulkOption}
+                    onChange={(e) => setBulkOption(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select a pack size</option>
+                    <option value="10">Pack of 10 @ $15.12 each - Save 10%</option>
+                    <option value="25">Pack of 25 @ $14.28 each - Save 15%</option>
+                    <option value="50">Pack of 50 @ $13.44 each - Save 20%</option>
+                    <option value="100">Pack of 100 @ $12.60 each - Save 25%</option>
+                    <option value="200">Pack of 200 @ $11.76 each - Save 30%</option>
+                  </select>
                 </div>
 
-                <div id="checkout-row" className="columns">
-                  <div id="qty-price" className="column text-center">
-                    <div id="quantity-container" className="mb-4">
-                      <label id="quantity-label" htmlFor="product-quantity" className="mr-2">
-                        Quantity:
-                      </label>
-                      <input 
-                        type="number" 
-                        id="product-quantity" 
-                        step="1" 
-                        min="1" 
-                        value={quantity}
-                        onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                        className="text-center w-20 px-2 py-1 border rounded"
-                      />
-                    </div>
-                    <div id="checkout-total" className="column">
-                      <span id="label-total" className="text-lg">Total:</span>
-                      <span id="total-quantity-price" className="text-3xl font-bold text-blue-600 ml-2">
-                        ${((getTotalPrice() || 0) * quantity).toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="column is-full-mobile is-one-third-tablet">
-                    <div>
-                      <button className="btn btn-success btn-lg btn-block w-full bg-green-600 text-white py-3 px-6 rounded font-semibold">
-                        <i className="fa fa-shopping-cart mr-2"></i>
-                        Add to cart
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="dashed-break border-t border-dashed border-gray-300 my-4"></div>
-
-                <div>
-                  <div className="product-summary">
-                    <p className="mb-4">
-                      For more custom options. Please
-                      <a href="/contact-us" className="text-blue-600 underline ml-1">contact us</a>
-                    </p>
-                    
-                    <PricingEngine
-                      selectedFrame={selectedFrame}
-                      selectedMatBoard={selectedMatBoard}
-                      matStyle={matStyle}
-                      imageWidth={imageWidth}
-                      imageHeight={imageHeight}
-                      uniformWidth={uniformWidth}
-                      customWidths={customWidths}
-                      matWidthType={matWidthType}
-                      quantity={quantity}
-                      selectedGlass={selectedGlass}
-                      selectedBacking={selectedBacking}
-                      selectedExtras={selectedExtras}
+                {/* Quantity and Total Row */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <label htmlFor="product-quantity" className="text-sm font-medium text-gray-700">
+                      Quantity:
+                    </label>
+                    <input 
+                      type="number" 
+                      id="product-quantity" 
+                      step="1" 
+                      min="1" 
+                      value={quantity}
+                      onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg font-medium text-gray-700">Total:</span>
+                    <span className="text-3xl font-bold text-blue-600">
+                      ${((getTotalPrice() || 0) * quantity).toFixed(2)}
+                    </span>
+                  </div>
+                  
+                  <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md font-semibold flex items-center space-x-2 transition-colors">
+                    <i className="fa fa-shopping-cart"></i>
+                    <span>Add to cart</span>
+                  </button>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-dashed border-gray-300 my-4"></div>
+
+                {/* Product Summary */}
+                <div>
+                  <p className="text-center text-gray-600 mb-4">
+                    For more custom options. Please{' '}
+                    <a href="/contact-us" className="text-blue-600 underline hover:text-blue-800">
+                      contact us
+                    </a>
+                  </p>
+                  
+                  <PricingEngine
+              selectedFrame={selectedFrame}
+              selectedMatBoard={selectedMatBoard}
+                    matStyle={matStyle}
+              imageWidth={imageWidth}
+              imageHeight={imageHeight}
+                    uniformWidth={uniformWidth}
+                    customWidths={customWidths}
+                    matWidthType={matWidthType}
+                    quantity={quantity}
+                    selectedGlass={selectedGlass}
+                    selectedBacking={selectedBacking}
+                    selectedExtras={selectedExtras}
+                  />
                 </div>
               </div>
             </div>

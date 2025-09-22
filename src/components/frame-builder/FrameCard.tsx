@@ -1,5 +1,5 @@
 import React from 'react';
-import { Frame } from '../types';
+import { Frame } from './types';
 
 interface FrameCardProps {
   frame: Frame;

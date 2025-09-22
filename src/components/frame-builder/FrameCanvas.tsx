@@ -225,28 +225,108 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     ctx.restore();
   };
 
-  const drawFrame = (
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    thickness: number,
-    frame: Frame
-  ) => {
-    // Get frame colors for gradient
-    const baseColor = getFrameColor(frame);
-    
-    // Draw outer frame with solid color
+const drawWoodenFrame = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  thickness: number,
+  baseColor: string,
+  colour: string
+) => {
+  // Create wood grain gradient
+  const woodGradient = ctx.createLinearGradient(x, y, x + w, y);
+  const lightWood = adjustColor(baseColor, 25);
+  const mediumWood = baseColor;
+  const darkWood = adjustColor(baseColor, -20);
+  
+  woodGradient.addColorStop(0, lightWood);
+  woodGradient.addColorStop(0.3, mediumWood);
+  woodGradient.addColorStop(0.6, darkWood);
+  woodGradient.addColorStop(0.8, mediumWood);
+  woodGradient.addColorStop(1, lightWood);
+  
+  ctx.fillStyle = woodGradient;
+  ctx.fillRect(x, y, w, h);
+  
+  // Add wood grain texture
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  
+  // Draw vertical wood grain lines
+  ctx.strokeStyle = adjustColor(baseColor, -35);
+  ctx.lineWidth = 0.8;
+  ctx.globalAlpha = 0.6;
+  
+  for (let i = 0; i < w / 3; i += 2) {
+    const grainX = x + i;
+    const variation = Math.sin(i * 0.1) * 2;
+    ctx.beginPath();
+    ctx.moveTo(grainX, y);
+    ctx.quadraticCurveTo(grainX + variation, y + h / 2, grainX, y + h);
+    ctx.stroke();
+  }
+  
+  // Draw horizontal wood rings
+  ctx.strokeStyle = adjustColor(baseColor, -25);
+  ctx.lineWidth = 1.2;
+  ctx.globalAlpha = 0.4;
+  
+  for (let i = 0; i < h / 8; i++) {
+    const ringY = y + (i * 8) + Math.random() * 3;
+    const curve = Math.sin(i * 0.5) * 10;
+    ctx.beginPath();
+    ctx.moveTo(x, ringY);
+    ctx.quadraticCurveTo(x + w / 2 + curve, ringY + 2, x + w, ringY);
+    ctx.stroke();
+  }
+  
+  // Add wood knots and imperfections
+  ctx.fillStyle = adjustColor(baseColor, -40);
+  ctx.globalAlpha = 0.3;
+  
+  // Add random knots
+  for (let i = 0; i < 2; i++) {
+    const knotX = x + (w * (0.2 + i * 0.3)) + (Math.random() - 0.5) * 15;
+    const knotY = y + (h * (0.3 + i * 0.2)) + (Math.random() - 0.5) * 15;
+    const knotSize = 2 + Math.random() * 3;
+    ctx.beginPath();
+    ctx.ellipse(knotX, knotY, knotSize, knotSize * 0.7, Math.random() * Math.PI, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  ctx.restore();
+};
+
+const drawFrame = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  thickness: number,
+  frame: Frame
+) => {
+  // Get frame colors for gradient
+  const baseColor = getFrameColor(frame);
+  
+  // Draw frame based on material
+  if (frame.material === 'Wood') {
+    // Draw wooden frame with texture
+    drawWoodenFrame(ctx, x, y, w, h, thickness, baseColor, frame.colour);
+  } else {
+    // Draw standard frame with solid color
     ctx.fillStyle = baseColor;
     ctx.fillRect(x, y, w, h);
-
-    // Draw inner cutout
-    ctx.clearRect(x + thickness, y + thickness, w - thickness * 2, h - thickness * 2);
-
-    // Draw corner lines
-    drawCornerLines(ctx, x, y, w, h, thickness, baseColor);
-  };
+  }
+  
+  // Draw inner cutout
+  ctx.clearRect(x + thickness, y + thickness, w - thickness * 2, h - thickness * 2);
+  
+  // Draw corner lines
+  drawCornerLines(ctx, x, y, w, h, thickness, baseColor);
+};
 
   const getFrameColor = (frame: Frame): string => {
     const colorMap: { [key: string]: string } = {

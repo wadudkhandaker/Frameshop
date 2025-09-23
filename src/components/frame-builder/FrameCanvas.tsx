@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Frame, MatBoard } from '../types';
+import { Frame, MatBoard } from './types';
 
 interface FrameCanvasProps {
   width: number;
@@ -450,7 +450,7 @@ const drawFrame = (
   // Draw frame based on material
   if (frame.material === 'Wood') {
     // Draw wooden frame with texture
-    drawWoodenFrame(ctx, x, y, w, h, thickness, baseColor, frame.colour);
+    drawWoodenFrame(ctx, x, y, w, h, thickness, baseColor, frame.color);
   } else {
     // Draw standard frame with solid color
     ctx.fillStyle = baseColor;

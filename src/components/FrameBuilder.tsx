@@ -167,6 +167,7 @@ const FrameBuilder: React.FC = () => {
                       parseFloat(customWidths.right) || 5
                     )
                 }
+                matStyle={matStyle}
                 className="w-full"
               />
             </div>

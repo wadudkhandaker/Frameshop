@@ -10,6 +10,7 @@ interface FrameCanvasProps {
   matting: boolean;
   selectedMatBoard: MatBoard | null;
   matWidth: number;
+  matStyle: '0' | '1' | '2'; // None, Single, Double
   className?: string;
 }
 
@@ -22,6 +23,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
   matting,
   selectedMatBoard,
   matWidth,
+  matStyle,
   className = ''
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -98,26 +100,35 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     if (image) {
       const img = new Image();
       img.onload = () => {
+        // Calculate mat padding to leave some mat area visible
+        const matPadding = matStyle !== '0' && selectedMatBoard ? 30 : 0; // Leave 30px of mat visible
+        
+        // Calculate image area with mat padding
+        const imageAreaX = imageX + matPadding;
+        const imageAreaY = imageY + matPadding;
+        const imageAreaWidth = displayWidth - (matPadding * 2);
+        const imageAreaHeight = displayHeight - (matPadding * 2);
+        
         ctx.save();
-        ctx.rect(imageX, imageY, displayWidth, displayHeight);
+        ctx.rect(imageAreaX, imageAreaY, imageAreaWidth, imageAreaHeight);
         ctx.clip();
         
-        // Calculate image scaling to fit
+        // Calculate image scaling to fit in the smaller area
         const imgAspect = img.width / img.height;
-        const areaAspect = displayWidth / displayHeight;
+        const areaAspect = imageAreaWidth / imageAreaHeight;
         
         let drawWidth, drawHeight, drawX, drawY;
         
         if (imgAspect > areaAspect) {
-          drawHeight = displayHeight;
+          drawHeight = imageAreaHeight;
           drawWidth = drawHeight * imgAspect;
-          drawX = imageX - (drawWidth - displayWidth) / 2;
-          drawY = imageY;
+          drawX = imageAreaX - (drawWidth - imageAreaWidth) / 2;
+          drawY = imageAreaY;
         } else {
-          drawWidth = displayWidth;
+          drawWidth = imageAreaWidth;
           drawHeight = drawWidth / imgAspect;
-          drawX = imageX;
-          drawY = imageY - (drawHeight - displayHeight) / 2;
+          drawX = imageAreaX;
+          drawY = imageAreaY - (drawHeight - imageAreaHeight) / 2;
         }
         
         ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
@@ -152,15 +163,15 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
       ctx.fillRect(logoX + logoSize * 0.4, logoY + logoSize * 0.4, logoSize * 0.6, logoSize * 0.6);
     }
 
-    // Draw mat board if selected
-    if (matting && selectedMatBoard) {
-      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard);
+    // Draw mat board based on mat style
+    if (matStyle !== '0' && selectedMatBoard) {
+      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle);
     }
 
     // Draw size information like frameshop.com.au
     drawSizeInfo(ctx, imageX, imageY, displayWidth, displayHeight, width, height, units, frame);
 
-  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth]);
+  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matStyle]);
 
   const drawWoodGradientInnerShadow = (
     ctx: CanvasRenderingContext2D,
@@ -242,7 +253,8 @@ const drawMatBoard = (
   totalFrameHeight: number,
   frameWidth: number,
   matWidth: number,
-  matBoard: MatBoard
+  matBoard: MatBoard,
+  matStyle: '0' | '1' | '2'
 ) => {
   // Calculate mat board dimensions
   const matWidthPixels = matWidth * 50; // Convert cm to pixels
@@ -251,7 +263,25 @@ const drawMatBoard = (
   const matW = totalFrameWidth - (frameWidth * 2);
   const matH = totalFrameHeight - (frameWidth * 2);
 
-  // Draw mat board background
+  if (matStyle === '1') {
+    // Single mat - draw one mat layer
+    drawSingleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard);
+  } else if (matStyle === '2') {
+    // Double mat - draw two mat layers with different colors
+    drawDoubleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard);
+  }
+};
+
+const drawSingleMat = (
+  ctx: CanvasRenderingContext2D,
+  matX: number,
+  matY: number,
+  matW: number,
+  matH: number,
+  matWidthPixels: number,
+  matBoard: MatBoard
+) => {
+  // Draw single mat background
   ctx.fillStyle = matBoard.color;
   ctx.fillRect(matX, matY, matW, matH);
 
@@ -273,6 +303,62 @@ const drawMatBoard = (
   ctx.lineWidth = 1;
   ctx.strokeRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
   ctx.restore();
+};
+
+const drawDoubleMat = (
+  ctx: CanvasRenderingContext2D,
+  matX: number,
+  matY: number,
+  matW: number,
+  matH: number,
+  matWidthPixels: number,
+  matBoard: MatBoard
+) => {
+  // Calculate dimensions for double mat
+  const outerMatWidth = matWidthPixels * 1.5; // Outer mat is wider
+  const innerMatWidth = matWidthPixels * 0.5; // Inner mat is narrower
+  
+  // Draw outer mat (darker/lighter shade)
+  const outerColor = adjustMatColor(matBoard.color, -20);
+  ctx.fillStyle = outerColor;
+  ctx.fillRect(matX, matY, matW, matH);
+  
+  // Draw inner mat (original color)
+  const innerMatX = matX + outerMatWidth;
+  const innerMatY = matY + outerMatWidth;
+  const innerMatW = matW - (outerMatWidth * 2);
+  const innerMatH = matH - (outerMatWidth * 2);
+  
+  ctx.fillStyle = matBoard.color;
+  ctx.fillRect(innerMatX, innerMatY, innerMatW, innerMatH);
+
+  // Draw inner cutout for image
+  const imageAreaX = innerMatX + innerMatWidth;
+  const imageAreaY = innerMatY + innerMatWidth;
+  const imageAreaW = innerMatW - (innerMatWidth * 2);
+  const imageAreaH = innerMatH - (innerMatWidth * 2);
+  
+  ctx.clearRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
+
+  // Add subtle shadow around the mat opening
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
+  ctx.restore();
+};
+
+const adjustMatColor = (color: string, amount: number): string => {
+  // Simple color adjustment for double mat effect
+  const hex = color.replace('#', '');
+  const r = Math.max(0, Math.min(255, parseInt(hex.substr(0, 2), 16) + amount));
+  const g = Math.max(0, Math.min(255, parseInt(hex.substr(2, 2), 16) + amount));
+  const b = Math.max(0, Math.min(255, parseInt(hex.substr(4, 2), 16) + amount));
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 };
 
 const drawWoodenFrame = (

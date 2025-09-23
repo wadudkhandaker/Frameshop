@@ -100,10 +100,10 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     if (image) {
       const img = new Image();
       img.onload = () => {
-        // Calculate mat padding to leave some mat area visible
-        const matPadding = matStyle !== '0' && selectedMatBoard ? 50 : 0; // Leave 30px of mat visible
+        // Calculate mat padding to make picture box smaller
+        const matPadding = matStyle !== '0' && selectedMatBoard ? 60 : 0; // Make picture box smaller
         
-        // Calculate image area with mat padding
+        // Calculate smaller image area
         const imageAreaX = imageX + matPadding;
         const imageAreaY = imageY + matPadding;
         const imageAreaWidth = displayWidth - (matPadding * 2);
@@ -136,24 +136,27 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
       };
       img.src = image;
     } else {
-      // White background for image area
+      // Calculate mat padding for white background
+      const matPadding = matStyle !== '0' && selectedMatBoard ? 60 : 0;
+      
+      // White background for image area (smaller when mat is selected)
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(imageX, imageY, displayWidth, displayHeight);
+      ctx.fillRect(imageX + matPadding, imageY + matPadding, displayWidth - (matPadding * 2), displayHeight - (matPadding * 2));
       
       // Draw inner shadow over the white background based on material
       ctx.save();
       if (frame.material === 'Wood') {
-        drawWoodGradientInnerShadow(ctx, imageX, imageY, displayWidth, displayHeight);
+        drawWoodGradientInnerShadow(ctx, imageX + matPadding, imageY + matPadding, displayWidth - (matPadding * 2), displayHeight - (matPadding * 2));
       } else {
-        drawStandardInnerShadow(ctx, imageX, imageY, displayWidth, displayHeight);
+        drawStandardInnerShadow(ctx, imageX + matPadding, imageY + matPadding, displayWidth - (matPadding * 2), displayHeight - (matPadding * 2));
       }
       ctx.restore();
       
       // Draw frameshop.com.au style logo placeholder
       ctx.fillStyle = '#6366f1';
-      const logoSize = Math.min(displayWidth, displayHeight) * 0.3;
-      const logoX = imageX + (displayWidth - logoSize) / 2;
-      const logoY = imageY + (displayHeight - logoSize) / 2;
+      const logoSize = Math.min(displayWidth - (matPadding * 2), displayHeight - (matPadding * 2)) * 0.3;
+      const logoX = (imageX + matPadding) + ((displayWidth - (matPadding * 2)) - logoSize) / 2;
+      const logoY = (imageY + matPadding) + ((displayHeight - (matPadding * 2)) - logoSize) / 2;
       
       // Draw overlapping squares (frameshop logo style)
       ctx.fillRect(logoX, logoY, logoSize * 0.6, logoSize * 0.6);

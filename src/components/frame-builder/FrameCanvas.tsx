@@ -101,7 +101,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
       const img = new Image();
       img.onload = () => {
         // Calculate mat padding to leave some mat area visible
-        const matPadding = matStyle !== '0' && selectedMatBoard ? 30 : 0; // Leave 30px of mat visible
+        const matPadding = matStyle !== '0' && selectedMatBoard ? 50 : 0; // Leave 30px of mat visible
         
         // Calculate image area with mat padding
         const imageAreaX = imageX + matPadding;

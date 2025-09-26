@@ -79,6 +79,11 @@ const FrameBuilder: React.FC = () => {
     right: '5'
   });
   
+  // Bottom mat states (for double mat)
+  const [bottomActiveMatCategory, setBottomActiveMatCategory] = useState<MatCategory>('white-core');
+  const [bottomSelectedMatBoard, setBottomSelectedMatBoard] = useState<MatBoard | null>(null);
+  const [bottomUniformWidth, setBottomUniformWidth] = useState<string>('2');
+  
   // Glass and Backing states
   const [selectedGlass, setSelectedGlass] = useState<string>('clear');
   const [selectedBacking, setSelectedBacking] = useState<string>('standard');
@@ -167,7 +172,9 @@ const FrameBuilder: React.FC = () => {
                       parseFloat(customWidths.right) || 5
                     )
                 }
-              matStyle={matStyle}
+                matStyle={matStyle}
+                bottomSelectedMatBoard={bottomSelectedMatBoard}
+                bottomMatWidth={parseFloat(bottomUniformWidth) || 2}
                 className="w-full"
               />
             </div>
@@ -338,6 +345,12 @@ const FrameBuilder: React.FC = () => {
                     setUniformWidth={setUniformWidth}
                     customWidths={customWidths}
                     setCustomWidths={setCustomWidths}
+                    bottomActiveMatCategory={bottomActiveMatCategory}
+                    setBottomActiveMatCategory={setBottomActiveMatCategory}
+                    bottomSelectedMatBoard={bottomSelectedMatBoard}
+                    setBottomSelectedMatBoard={setBottomSelectedMatBoard}
+                    bottomUniformWidth={bottomUniformWidth}
+                    setBottomUniformWidth={setBottomUniformWidth}
                   />
                 )}
 

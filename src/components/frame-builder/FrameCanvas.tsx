@@ -11,6 +11,8 @@ interface FrameCanvasProps {
   selectedMatBoard: MatBoard | null;
   matWidth: number;
   matStyle: '0' | '1' | '2'; // None, Single, Double
+  bottomSelectedMatBoard: MatBoard | null;
+  bottomMatWidth: number;
   className?: string;
 }
 
@@ -24,6 +26,8 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
   selectedMatBoard,
   matWidth,
   matStyle,
+  bottomSelectedMatBoard,
+  bottomMatWidth,
   className = ''
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -99,7 +103,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
 
     // Draw mat board based on mat style (draw this first, before picture box)
     if (matStyle !== '0' && selectedMatBoard) {
-      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle);
+      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle, bottomSelectedMatBoard, bottomMatWidth);
     }
 
     // Calculate picture box coordinates (same for both image and no-image cases)
@@ -176,7 +180,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     // Draw size information like frameshop.com.au
     drawSizeInfo(ctx, imageX, imageY, displayWidth, displayHeight, width, height, units, frame);
 
-  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matStyle]);
+  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matStyle, bottomSelectedMatBoard, bottomMatWidth]);
 
   const drawWoodGradientInnerShadow = (
     ctx: CanvasRenderingContext2D,
@@ -259,7 +263,9 @@ const drawMatBoard = (
   frameWidth: number,
   matWidth: number,
   matBoard: MatBoard,
-  matStyle: '0' | '1' | '2'
+  matStyle: '0' | '1' | '2',
+  bottomMatBoard: MatBoard | null,
+  bottomMatWidth: number
 ) => {
   // Calculate mat board dimensions from the matWidth prop
   const matWidthPixels = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
@@ -273,7 +279,7 @@ const drawMatBoard = (
     drawSingleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard);
   } else if (matStyle === '2') {
     // Double mat - draw two mat layers with different colors
-    drawDoubleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard);
+    drawDoubleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard, bottomMatBoard, bottomMatWidth);
   }
 };
 
@@ -333,31 +339,45 @@ const drawDoubleMat = (
   matW: number,
   matH: number,
   matWidthPixels: number,
-  matBoard: MatBoard
+  topMatBoard: MatBoard,
+  bottomMatBoard: MatBoard | null,
+  bottomMatWidth: number
 ) => {
-  // Double mat: same mat area with top mat color + border with bottom mat color
+  // Double mat: top mat area + bottom mat box (10px bigger than picture box)
   const pictureBoxX = matX + matWidthPixels;
   const pictureBoxY = matY + matWidthPixels;
   const pictureBoxW = matW - (matWidthPixels * 2);
   const pictureBoxH = matH - (matWidthPixels * 2);
   
-  // 1. Fill mat area with top mat color (same as single mat)
-  ctx.fillStyle = matBoard.color;
+  // 1. Fill mat area with top mat color
+  ctx.fillStyle = topMatBoard.color;
   ctx.fillRect(matX, matY, matW, matH);
   
-  // 2. Draw border with bottom mat color (2px bigger than mat area)
-  const bottomMatColor = adjustMatColor(matBoard.color, -30);
-  ctx.fillStyle = bottomMatColor;
-  const borderWidth = matWidthPixels + 2; // 2px bigger
-  
-  // Top border with bottom mat color
-  ctx.fillRect(matX - 2, matY - 2, matW + 4, borderWidth);
-  // Bottom border with bottom mat color
-  ctx.fillRect(matX - 2, matY + matH - borderWidth + 2, matW + 4, borderWidth);
-  // Left border with bottom mat color
-  ctx.fillRect(matX - 2, matY - 2, borderWidth, matH + 4);
-  // Right border with bottom mat color
-  ctx.fillRect(matX + matW - borderWidth + 2, matY - 2, borderWidth, matH + 4);
+  // 2. Draw bottom mat box (if bottom mat is selected)
+  if (bottomMatBoard) {
+    const bottomMatBoxSize = 10; // 10px bigger than picture box
+    const bottomMatBoxX = pictureBoxX - bottomMatBoxSize;
+    const bottomMatBoxY = pictureBoxY - bottomMatBoxSize;
+    const bottomMatBoxW = pictureBoxW + (bottomMatBoxSize * 2);
+    const bottomMatBoxH = pictureBoxH + (bottomMatBoxSize * 2);
+    
+    // Fill bottom mat box with bottom mat color
+    ctx.fillStyle = bottomMatBoard.color;
+    ctx.fillRect(bottomMatBoxX, bottomMatBoxY, bottomMatBoxW, bottomMatBoxH);
+    
+    // Draw white border around bottom mat box (4px)
+    ctx.fillStyle = '#ffffff';
+    const whiteBorderWidth = 4;
+    
+    // Top white border
+    ctx.fillRect(bottomMatBoxX - whiteBorderWidth, bottomMatBoxY - whiteBorderWidth, bottomMatBoxW + (whiteBorderWidth * 2), whiteBorderWidth);
+    // Bottom white border
+    ctx.fillRect(bottomMatBoxX - whiteBorderWidth, bottomMatBoxY + bottomMatBoxH, bottomMatBoxW + (whiteBorderWidth * 2), whiteBorderWidth);
+    // Left white border
+    ctx.fillRect(bottomMatBoxX - whiteBorderWidth, bottomMatBoxY - whiteBorderWidth, whiteBorderWidth, bottomMatBoxH + (whiteBorderWidth * 2));
+    // Right white border
+    ctx.fillRect(bottomMatBoxX + bottomMatBoxW, bottomMatBoxY - whiteBorderWidth, whiteBorderWidth, bottomMatBoxH + (whiteBorderWidth * 2));
+  }
 };
 
 const adjustMatColor = (color: string, amount: number): string => {

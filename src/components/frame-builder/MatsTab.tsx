@@ -30,6 +30,13 @@ interface MatsTabProps {
     left: string;
     right: string;
   }) => void;
+  // Bottom mat props
+  bottomActiveMatCategory: MatCategory;
+  setBottomActiveMatCategory: (category: MatCategory) => void;
+  bottomSelectedMatBoard: MatBoard | null;
+  setBottomSelectedMatBoard: (board: MatBoard | null) => void;
+  bottomUniformWidth: string;
+  setBottomUniformWidth: (width: string) => void;
 }
 
 const MatsTab: React.FC<MatsTabProps> = ({
@@ -48,11 +55,21 @@ const MatsTab: React.FC<MatsTabProps> = ({
   uniformWidth,
   setUniformWidth,
   customWidths,
-  setCustomWidths
+  setCustomWidths,
+  bottomActiveMatCategory,
+  setBottomActiveMatCategory,
+  bottomSelectedMatBoard,
+  setBottomSelectedMatBoard,
+  bottomUniformWidth,
+  setBottomUniformWidth
 }) => {
   const filteredMatBoards = useMemo(() => {
     return matBoards.filter(mat => mat.category === activeMatCategory);
   }, [activeMatCategory]);
+
+  const filteredBottomMatBoards = useMemo(() => {
+    return matBoards.filter(mat => mat.category === bottomActiveMatCategory);
+  }, [bottomActiveMatCategory]);
 
   return (
     <div className="space-y-6">
@@ -250,7 +267,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
         </>
       )}
 
-      {/* Bottom Mat - HTML only, visible when Double is selected */}
+      {/* Bottom Mat - Interactive, visible when Double is selected */}
       {matStyle === '2' && (
         <div className="pt-2">
           <hr className="my-4" />
@@ -258,37 +275,57 @@ const MatsTab: React.FC<MatsTabProps> = ({
             <h4 className="text-lg font-semibold text-gray-900">Bottom Mat</h4>
           </div>
 
-          {/* Tabs (static for now) */}
+          {/* Bottom Mat Category Tabs */}
           <div className="border-b border-gray-200 mb-4">
-            <ul className="flex gap-1">
-              <li className="px-4 py-2 text-sm font-medium rounded-t-lg text-gray-600 hover:text-amber-600 hover:bg-amber-50">White Core</li>
-              <li className="px-4 py-2 text-sm font-medium rounded-t-lg bg-amber-600 text-white border-b-2 border-amber-600">Black Core</li>
-              <li className="px-4 py-2 text-sm font-medium rounded-t-lg text-gray-600 hover:text-amber-600 hover:bg-amber-50">Museum</li>
-            </ul>
+            <div className="flex gap-1">
+              {[
+                { id: 'white-core', label: 'White Core' },
+                { id: 'black-core', label: 'Black Core' },
+                { id: 'museum', label: 'Museum' }
+              ].map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setBottomActiveMatCategory(category.id as MatCategory)}
+                  className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200 ${
+                    bottomActiveMatCategory === category.id
+                      ? 'bg-amber-600 text-white border-b-2 border-amber-600'
+                      : 'text-gray-600 hover:text-amber-600 hover:bg-amber-50'
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Swatch grid (static, non-interactive) */}
+          {/* Bottom Mat Board Grid */}
           <div className="grid grid-cols-8 gap-2 mb-6">
-            {matBoards.slice(0, 24).map((mat) => (
-              <div
+            {filteredBottomMatBoards.map((mat) => (
+              <button
                 key={`bottom-${mat.id}`}
-                className="w-12 h-12 rounded-full border-2 border-gray-300"
+                onClick={() => setBottomSelectedMatBoard(mat)}
+                className={`w-12 h-12 rounded-full border-2 transition-all duration-200 ${
+                  bottomSelectedMatBoard?.id === mat.id
+                    ? 'border-amber-500 ring-2 ring-amber-200'
+                    : 'border-gray-300 hover:border-amber-300'
+                }`}
                 style={{ backgroundColor: mat.color }}
                 title={mat.name}
               />
             ))}
           </div>
 
-          {/* Width input (static) */}
+          {/* Bottom Mat Width Input */}
           <div className="flex items-center gap-3">
             <label className="text-sm text-gray-700">Width:</label>
             <input
               type="number"
+              value={bottomUniformWidth}
+              onChange={(e) => setBottomUniformWidth(e.target.value)}
               className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               min="0.5"
               max="20"
               step="0.1"
-              defaultValue={0.5}
             />
             <span className="text-sm text-gray-600">cm</span>
           </div>

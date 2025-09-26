@@ -157,7 +157,7 @@ const FrameBuilder: React.FC = () => {
                 frame={selectedFrame}
                 image={uploadedImage}
                 matting={selectedMatBoard !== null}
-                selectedMatBoard={selectedMatBoard}
+              selectedMatBoard={selectedMatBoard}
                 matWidth={matWidthType === 'uniform' 
                   ? parseFloat(uniformWidth) || 5
                   : Math.max(
@@ -167,7 +167,7 @@ const FrameBuilder: React.FC = () => {
                       parseFloat(customWidths.right) || 5
                     )
                 }
-                matStyle={matStyle}
+              matStyle={matStyle}
                 className="w-full"
               />
             </div>
@@ -185,13 +185,13 @@ const FrameBuilder: React.FC = () => {
 
             {/* Dimensions Section */}
             <section className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <div className="space-y-6">
+          <div className="space-y-6">
                 {/* Upload Section */}
                 <div className="flex items-center space-x-4">
                   <h4 className="text-lg font-semibold text-gray-800 whitespace-nowrap">Printing (Optional)</h4>
                   <ImageUploader
-                    uploadedImage={uploadedImage}
-                    setUploadedImage={setUploadedImage}
+              uploadedImage={uploadedImage}
+              setUploadedImage={setUploadedImage}
                     onImageProcessed={setProcessedImageData}
                   />
                 </div>

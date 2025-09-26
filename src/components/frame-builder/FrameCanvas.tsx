@@ -109,15 +109,15 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     let pictureBoxHeight = displayHeight;
     
     if (matStyle === '1' && selectedMatBoard) {
-      // Single mat - fixed mat area size
-      const matPadding = 60; // Fixed pixel size for consistent mat area
+      // Single mat - use dynamic mat width
+      const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
       pictureBoxX = imageX + matPadding;
       pictureBoxY = imageY + matPadding;
       pictureBoxWidth = displayWidth - (matPadding * 2);
       pictureBoxHeight = displayHeight - (matPadding * 2);
     } else if (matStyle === '2' && selectedMatBoard) {
-      // Double mat - same mat area size as single mat
-      const matPadding = 60; // Same fixed pixel size as single mat
+      // Double mat - use dynamic mat width
+      const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
       pictureBoxX = imageX + matPadding;
       pictureBoxY = imageY + matPadding;
       pictureBoxWidth = displayWidth - (matPadding * 2);
@@ -261,8 +261,8 @@ const drawMatBoard = (
   matBoard: MatBoard,
   matStyle: '0' | '1' | '2'
 ) => {
-  // Calculate mat board dimensions - use fixed size for consistent mat area
-  const matWidthPixels = 60; // Fixed pixel size for consistent mat area
+  // Calculate mat board dimensions from the matWidth prop
+  const matWidthPixels = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
   const matX = frameX + frameWidth;
   const matY = frameY + frameWidth;
   const matW = totalFrameWidth - (frameWidth * 2);

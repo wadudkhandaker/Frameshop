@@ -97,68 +97,81 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
       drawStandardInnerShadow(ctx, imageX, imageY, displayWidth, displayHeight);
     }
 
+    // Draw mat board based on mat style (draw this first, before picture box)
+    if (matStyle !== '0' && selectedMatBoard) {
+      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle);
+    }
+
+    // Calculate picture box coordinates (same for both image and no-image cases)
+    let pictureBoxX = imageX;
+    let pictureBoxY = imageY;
+    let pictureBoxWidth = displayWidth;
+    let pictureBoxHeight = displayHeight;
+    
+    if (matStyle === '1' && selectedMatBoard) {
+      // Single mat - fixed mat area size
+      const matPadding = 60; // Fixed pixel size for consistent mat area
+      pictureBoxX = imageX + matPadding;
+      pictureBoxY = imageY + matPadding;
+      pictureBoxWidth = displayWidth - (matPadding * 2);
+      pictureBoxHeight = displayHeight - (matPadding * 2);
+    } else if (matStyle === '2' && selectedMatBoard) {
+      // Double mat - same mat area size as single mat
+      const matPadding = 60; // Same fixed pixel size as single mat
+      pictureBoxX = imageX + matPadding;
+      pictureBoxY = imageY + matPadding;
+      pictureBoxWidth = displayWidth - (matPadding * 2);
+      pictureBoxHeight = displayHeight - (matPadding * 2);
+    }
+
+    // Draw white background for picture box (always)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(pictureBoxX, pictureBoxY, pictureBoxWidth, pictureBoxHeight);
+
+    // Draw white border around picture box
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(pictureBoxX, pictureBoxY, pictureBoxWidth, pictureBoxHeight);
+
     if (image) {
       const img = new Image();
       img.onload = () => {
-        // Calculate mat padding to make picture box smaller
-        const matPadding = matStyle !== '0' && selectedMatBoard ? 60 : 0; // Make picture box smaller
-        
-        // Calculate smaller image area
-        const imageAreaX = imageX + matPadding;
-        const imageAreaY = imageY + matPadding;
-        const imageAreaWidth = displayWidth - (matPadding * 2);
-        const imageAreaHeight = displayHeight - (matPadding * 2);
-        
         ctx.save();
-        ctx.rect(imageAreaX, imageAreaY, imageAreaWidth, imageAreaHeight);
+        ctx.rect(pictureBoxX, pictureBoxY, pictureBoxWidth, pictureBoxHeight);
         ctx.clip();
         
-        // Calculate image scaling to fit in the smaller area
+        // Calculate image scaling to fit in the picture box
         const imgAspect = img.width / img.height;
-        const areaAspect = imageAreaWidth / imageAreaHeight;
+        const areaAspect = pictureBoxWidth / pictureBoxHeight;
         
         let drawWidth, drawHeight, drawX, drawY;
         
         if (imgAspect > areaAspect) {
-          drawHeight = imageAreaHeight;
+          drawHeight = pictureBoxHeight;
           drawWidth = drawHeight * imgAspect;
-          drawX = imageAreaX - (drawWidth - imageAreaWidth) / 2;
-          drawY = imageAreaY;
+          drawX = pictureBoxX - (drawWidth - pictureBoxWidth) / 2;
+          drawY = pictureBoxY;
         } else {
-          drawWidth = imageAreaWidth;
+          drawWidth = pictureBoxWidth;
           drawHeight = drawWidth / imgAspect;
-          drawX = imageAreaX;
-          drawY = imageAreaY - (drawHeight - imageAreaHeight) / 2;
+          drawX = pictureBoxX;
+          drawY = pictureBoxY - (drawHeight - pictureBoxHeight) / 2;
         }
         
         ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
         ctx.restore();
       };
       img.src = image;
+    }
+    
+    // Draw inner shadow over the picture box based on material
+    ctx.save();
+    if (frame.material === 'Wood') {
+      drawWoodGradientInnerShadow(ctx, pictureBoxX, pictureBoxY, pictureBoxWidth, pictureBoxHeight);
     } else {
-      // Calculate mat padding for white background
-      const matPadding = matStyle !== '0' && selectedMatBoard ? 60 : 0;
-      
-      // White background for image area (smaller when mat is selected)
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(imageX + matPadding, imageY + matPadding, displayWidth - (matPadding * 2), displayHeight - (matPadding * 2));
-      
-      // Draw inner shadow over the white background based on material
-      ctx.save();
-      if (frame.material === 'Wood') {
-        drawWoodGradientInnerShadow(ctx, imageX + matPadding, imageY + matPadding, displayWidth - (matPadding * 2), displayHeight - (matPadding * 2));
-      } else {
-        drawStandardInnerShadow(ctx, imageX + matPadding, imageY + matPadding, displayWidth - (matPadding * 2), displayHeight - (matPadding * 2));
-      }
-      ctx.restore();
-      
-      // Logo placeholder removed - clean white background only
+      drawStandardInnerShadow(ctx, pictureBoxX, pictureBoxY, pictureBoxWidth, pictureBoxHeight);
     }
-
-    // Draw mat board based on mat style
-    if (matStyle !== '0' && selectedMatBoard) {
-      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle);
-    }
+    ctx.restore();
 
     // Draw size information like frameshop.com.au
     drawSizeInfo(ctx, imageX, imageY, displayWidth, displayHeight, width, height, units, frame);
@@ -248,8 +261,8 @@ const drawMatBoard = (
   matBoard: MatBoard,
   matStyle: '0' | '1' | '2'
 ) => {
-  // Calculate mat board dimensions
-  const matWidthPixels = matWidth * 50; // Convert cm to pixels
+  // Calculate mat board dimensions - use fixed size for consistent mat area
+  const matWidthPixels = 60; // Fixed pixel size for consistent mat area
   const matX = frameX + frameWidth;
   const matY = frameY + frameWidth;
   const matW = totalFrameWidth - (frameWidth * 2);
@@ -273,27 +286,43 @@ const drawSingleMat = (
   matWidthPixels: number,
   matBoard: MatBoard
 ) => {
-  // Draw single mat background
+  // Draw single mat: white border (bigger) + mat area with top mat color
+  const pictureBoxX = matX + matWidthPixels;
+  const pictureBoxY = matY + matWidthPixels;
+  const pictureBoxW = matW - (matWidthPixels * 2);
+  const pictureBoxH = matH - (matWidthPixels * 2);
+  
+  // 1. Fill mat area with top mat color
   ctx.fillStyle = matBoard.color;
   ctx.fillRect(matX, matY, matW, matH);
-
-  // Draw inner cutout for image
-  const imageAreaX = matX + matWidthPixels;
-  const imageAreaY = matY + matWidthPixels;
-  const imageAreaW = matW - (matWidthPixels * 2);
-  const imageAreaH = matH - (matWidthPixels * 2);
   
-  ctx.clearRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
-
-  // Add subtle shadow around the mat opening
+  // 2. Draw white border around the picture box (4px wide)
+  ctx.fillStyle = '#ffffff'; // White border
+  const borderWidth = 4; // 4px wide border
+  
+  // Top white border around picture box
+  ctx.fillRect(pictureBoxX - borderWidth, pictureBoxY - borderWidth, pictureBoxW + (borderWidth * 2), borderWidth);
+  // Bottom white border around picture box
+  ctx.fillRect(pictureBoxX - borderWidth, pictureBoxY + pictureBoxH, pictureBoxW + (borderWidth * 2), borderWidth);
+  // Left white border around picture box
+  ctx.fillRect(pictureBoxX - borderWidth, pictureBoxY - borderWidth, borderWidth, pictureBoxH + (borderWidth * 2));
+  // Right white border around picture box
+  ctx.fillRect(pictureBoxX + pictureBoxW, pictureBoxY - borderWidth, borderWidth, pictureBoxH + (borderWidth * 2));
+  
+  // 3. Add inner shadow effect on the white border around picture box
   ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // More prominent shadow for 4px border
+  
+  // Inner shadow on the inside edges of the white border around picture box
+  // Top inner shadow
+  ctx.fillRect(pictureBoxX, pictureBoxY, pictureBoxW, 3);
+  // Bottom inner shadow
+  ctx.fillRect(pictureBoxX, pictureBoxY + pictureBoxH - 3, pictureBoxW, 3);
+  // Left inner shadow
+  ctx.fillRect(pictureBoxX, pictureBoxY, 3, pictureBoxH);
+  // Right inner shadow
+  ctx.fillRect(pictureBoxX + pictureBoxW - 3, pictureBoxY, 3, pictureBoxH);
+  
   ctx.restore();
 };
 
@@ -306,42 +335,29 @@ const drawDoubleMat = (
   matWidthPixels: number,
   matBoard: MatBoard
 ) => {
-  // Calculate dimensions for double mat
-  const outerMatWidth = matWidthPixels * 1.5; // Outer mat is wider
-  const innerMatWidth = matWidthPixels * 0.5; // Inner mat is narrower
+  // Double mat: same mat area with top mat color + border with bottom mat color
+  const pictureBoxX = matX + matWidthPixels;
+  const pictureBoxY = matY + matWidthPixels;
+  const pictureBoxW = matW - (matWidthPixels * 2);
+  const pictureBoxH = matH - (matWidthPixels * 2);
   
-  // Draw outer mat (darker/lighter shade)
-  const outerColor = adjustMatColor(matBoard.color, -20);
-  ctx.fillStyle = outerColor;
+  // 1. Fill mat area with top mat color (same as single mat)
+  ctx.fillStyle = matBoard.color;
   ctx.fillRect(matX, matY, matW, matH);
   
-  // Draw inner mat (original color)
-  const innerMatX = matX + outerMatWidth;
-  const innerMatY = matY + outerMatWidth;
-  const innerMatW = matW - (outerMatWidth * 2);
-  const innerMatH = matH - (outerMatWidth * 2);
+  // 2. Draw border with bottom mat color (2px bigger than mat area)
+  const bottomMatColor = adjustMatColor(matBoard.color, -30);
+  ctx.fillStyle = bottomMatColor;
+  const borderWidth = matWidthPixels + 2; // 2px bigger
   
-  ctx.fillStyle = matBoard.color;
-  ctx.fillRect(innerMatX, innerMatY, innerMatW, innerMatH);
-
-  // Draw inner cutout for image
-  const imageAreaX = innerMatX + innerMatWidth;
-  const imageAreaY = innerMatY + innerMatWidth;
-  const imageAreaW = innerMatW - (innerMatWidth * 2);
-  const imageAreaH = innerMatH - (innerMatWidth * 2);
-  
-  ctx.clearRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
-
-  // Add subtle shadow around the mat opening
-  ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(imageAreaX, imageAreaY, imageAreaW, imageAreaH);
-  ctx.restore();
+  // Top border with bottom mat color
+  ctx.fillRect(matX - 2, matY - 2, matW + 4, borderWidth);
+  // Bottom border with bottom mat color
+  ctx.fillRect(matX - 2, matY + matH - borderWidth + 2, matW + 4, borderWidth);
+  // Left border with bottom mat color
+  ctx.fillRect(matX - 2, matY - 2, borderWidth, matH + 4);
+  // Right border with bottom mat color
+  ctx.fillRect(matX + matW - borderWidth + 2, matY - 2, borderWidth, matH + 4);
 };
 
 const adjustMatColor = (color: string, amount: number): string => {

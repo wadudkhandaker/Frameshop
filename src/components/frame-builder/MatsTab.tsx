@@ -249,6 +249,51 @@ const MatsTab: React.FC<MatsTabProps> = ({
           </div>
         </>
       )}
+
+      {/* Bottom Mat - HTML only, visible when Double is selected */}
+      {matStyle === '2' && (
+        <div className="pt-2">
+          <hr className="my-4" />
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-lg font-semibold text-gray-900">Bottom Mat</h4>
+          </div>
+
+          {/* Tabs (static for now) */}
+          <div className="border-b border-gray-200 mb-4">
+            <ul className="flex gap-1">
+              <li className="px-4 py-2 text-sm font-medium rounded-t-lg text-gray-600 hover:text-amber-600 hover:bg-amber-50">White Core</li>
+              <li className="px-4 py-2 text-sm font-medium rounded-t-lg bg-amber-600 text-white border-b-2 border-amber-600">Black Core</li>
+              <li className="px-4 py-2 text-sm font-medium rounded-t-lg text-gray-600 hover:text-amber-600 hover:bg-amber-50">Museum</li>
+            </ul>
+          </div>
+
+          {/* Swatch grid (static, non-interactive) */}
+          <div className="grid grid-cols-8 gap-2 mb-6">
+            {matBoards.slice(0, 24).map((mat) => (
+              <div
+                key={`bottom-${mat.id}`}
+                className="w-12 h-12 rounded-full border-2 border-gray-300"
+                style={{ backgroundColor: mat.color }}
+                title={mat.name}
+              />
+            ))}
+          </div>
+
+          {/* Width input (static) */}
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-700">Width:</label>
+            <input
+              type="number"
+              className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              min="0.5"
+              max="20"
+              step="0.1"
+              defaultValue={0.5}
+            />
+            <span className="text-sm text-gray-600">cm</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

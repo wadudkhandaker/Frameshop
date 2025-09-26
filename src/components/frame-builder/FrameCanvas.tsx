@@ -39,9 +39,33 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size to match frameshop.com.au
-    const canvasWidth = 600;
-    const canvasHeight = 800;
+    // Calculate dynamic canvas size based on mat widths
+    const baseCanvasWidth = 1000; // Increased base size
+    const baseCanvasHeight = 1200; // Increased base size
+    const maxCanvasWidth = 2000; // Maximum canvas width
+    const maxCanvasHeight = 2000; // Maximum canvas height
+    
+    // Calculate additional space needed for mats
+    let additionalWidth = 0;
+    let additionalHeight = 0;
+    
+    if (matStyle === '1' && selectedMatBoard) {
+      // Single mat - add space for mat width
+      const matPadding = matWidth * 50; // Convert cm to pixels (increased from 20 to 50)
+      additionalWidth = matPadding * 2;
+      additionalHeight = matPadding * 2;
+    } else if (matStyle === '2' && selectedMatBoard && bottomSelectedMatBoard) {
+      // Double mat - add space for both top mat and bottom mat
+      const topMatPadding = matWidth * 50; // Increased from 20 to 50
+      const bottomMatPadding = bottomMatWidth * 50; // Increased from 20 to 50
+      additionalWidth = (topMatPadding + bottomMatPadding) * 2;
+      additionalHeight = (topMatPadding + bottomMatPadding) * 2;
+    }
+    
+    // Calculate final canvas size with limits
+    const canvasWidth = Math.min(baseCanvasWidth + additionalWidth, maxCanvasWidth);
+    const canvasHeight = Math.min(baseCanvasHeight + additionalHeight, maxCanvasHeight);
+    
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
@@ -56,8 +80,9 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     const frameWidth = frame.width * 50; // Convert cm to pixels (50px per cm for much bigger borders)
     
     // Calculate display size (maintain aspect ratio, fit in canvas)
-    const maxDisplayWidth = canvasWidth * 0.7;
-    const maxDisplayHeight = canvasHeight * 0.7;
+    // Use larger percentages for bigger canvas
+    const maxDisplayWidth = Math.min(canvasWidth * 0.7, 600); // Cap at 600px
+    const maxDisplayHeight = Math.min(canvasHeight * 0.6, 700); // Cap at 700px
     const aspectRatio = imageWidth / imageHeight;
     
     let displayWidth, displayHeight;
@@ -114,14 +139,14 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     
     if (matStyle === '1' && selectedMatBoard) {
       // Single mat - use dynamic mat width
-      const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
+      const matPadding = matWidth * 50; // Convert cm to pixels (50 pixels per cm)
       pictureBoxX = imageX + matPadding;
       pictureBoxY = imageY + matPadding;
       pictureBoxWidth = displayWidth - (matPadding * 2);
       pictureBoxHeight = displayHeight - (matPadding * 2);
     } else if (matStyle === '2' && selectedMatBoard) {
       // Double mat - use dynamic mat width
-      const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
+      const matPadding = matWidth * 50; // Convert cm to pixels (50 pixels per cm)
       pictureBoxX = imageX + matPadding;
       pictureBoxY = imageY + matPadding;
       pictureBoxWidth = displayWidth - (matPadding * 2);
@@ -268,7 +293,7 @@ const drawMatBoard = (
   bottomMatWidth: number
 ) => {
   // Calculate mat board dimensions from the matWidth prop
-  const matWidthPixels = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
+  const matWidthPixels = matWidth * 50; // Convert cm to pixels (50 pixels per cm)
   const matX = frameX + frameWidth;
   const matY = frameY + frameWidth;
   const matW = totalFrameWidth - (frameWidth * 2);
@@ -355,7 +380,7 @@ const drawDoubleMat = (
   
   // 2. Draw bottom mat box (if bottom mat is selected)
   if (bottomMatBoard) {
-    const bottomMatBoxSize = bottomMatWidth * 20; // Convert cm to pixels (20 pixels per cm)
+    const bottomMatBoxSize = bottomMatWidth * 50; // Convert cm to pixels (increased from 20 to 50) (20 pixels per cm)
     const bottomMatBoxX = pictureBoxX - bottomMatBoxSize;
     const bottomMatBoxY = pictureBoxY - bottomMatBoxSize;
     const bottomMatBoxW = pictureBoxW + (bottomMatBoxSize * 2);

@@ -152,18 +152,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
       }
       ctx.restore();
       
-      // Draw frameshop.com.au style logo placeholder
-      ctx.fillStyle = '#6366f1';
-      const logoSize = Math.min(displayWidth - (matPadding * 2), displayHeight - (matPadding * 2)) * 0.3;
-      const logoX = (imageX + matPadding) + ((displayWidth - (matPadding * 2)) - logoSize) / 2;
-      const logoY = (imageY + matPadding) + ((displayHeight - (matPadding * 2)) - logoSize) / 2;
-      
-      // Draw overlapping squares (frameshop logo style)
-      ctx.fillRect(logoX, logoY, logoSize * 0.6, logoSize * 0.6);
-      ctx.fillStyle = '#8b5cf6';
-      ctx.fillRect(logoX + logoSize * 0.2, logoY + logoSize * 0.2, logoSize * 0.6, logoSize * 0.6);
-      ctx.fillStyle = '#a78bfa';
-      ctx.fillRect(logoX + logoSize * 0.4, logoY + logoSize * 0.4, logoSize * 0.6, logoSize * 0.6);
+      // Logo placeholder removed - clean white background only
     }
 
     // Draw mat board based on mat style
@@ -557,7 +546,7 @@ const drawFrame = (
     const outsideSize = `${outsideWidth.toFixed(1)} x ${outsideHeight.toFixed(1)} ${units}`;
 
     // Draw size information in the center
-    ctx.fillStyle = '#6366f1';
+    ctx.fillStyle = '#666666';
     ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'center';
     

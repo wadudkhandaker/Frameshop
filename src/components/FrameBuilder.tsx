@@ -164,12 +164,12 @@ const FrameBuilder: React.FC = () => {
                 matting={selectedMatBoard !== null}
               selectedMatBoard={selectedMatBoard}
                 matWidth={matWidthType === 'uniform' 
-                  ? parseFloat(uniformWidth) || 5
+                  ? parseFloat(uniformWidth) || 0
                   : Math.max(
-                      parseFloat(customWidths.top) || 5,
-                      parseFloat(customWidths.bottom) || 5,
-                      parseFloat(customWidths.left) || 5,
-                      parseFloat(customWidths.right) || 5
+                      parseFloat(customWidths.top) || 0,
+                      parseFloat(customWidths.bottom) || 0,
+                      parseFloat(customWidths.left) || 0,
+                      parseFloat(customWidths.right) || 0
                     )
                 }
                 matStyle={matStyle}

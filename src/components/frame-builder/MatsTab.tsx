@@ -71,6 +71,9 @@ const MatsTab: React.FC<MatsTabProps> = ({
     return matBoards.filter(mat => mat.category === bottomActiveMatCategory);
   }, [bottomActiveMatCategory]);
 
+  // Debug current matStyle
+  console.log('Current matStyle:', matStyle, 'selectedMatBoard:', selectedMatBoard);
+
   return (
     <div className="space-y-6">
       {/* Mat Style */}
@@ -93,7 +96,10 @@ const MatsTab: React.FC<MatsTabProps> = ({
                 type="radio"
                 value="2"
                 checked={matStyle === '2'}
-                onChange={(e) => setMatStyle(e.target.value as MatStyle)}
+                onChange={(e) => {
+                  console.log('Setting matStyle to:', e.target.value);
+                  setMatStyle(e.target.value as MatStyle);
+                }}
                 className="mr-3 text-amber-600"
               />
               Double
@@ -103,7 +109,10 @@ const MatsTab: React.FC<MatsTabProps> = ({
                 type="radio"
                 value="0"
                 checked={matStyle === '0'}
-                onChange={(e) => setMatStyle(e.target.value as MatStyle)}
+                onChange={(e) => {
+                  console.log('Setting matStyle to:', e.target.value);
+                  setMatStyle(e.target.value as MatStyle);
+                }}
                 className="mr-3 text-amber-600"
               />
               None

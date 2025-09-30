@@ -40,10 +40,10 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     if (!ctx) return;
 
     // Calculate dynamic canvas size based on mat widths
-    const baseCanvasWidth = 1000; // Increased base size
-    const baseCanvasHeight = 1200; // Increased base size
-    const maxCanvasWidth = 2000; // Maximum canvas width
-    const maxCanvasHeight = 2000; // Maximum canvas height
+    const baseCanvasWidth = 450; // Decreased width
+    const baseCanvasHeight = 600; // Increased height more
+    const maxCanvasWidth = 650; // Reduced maximum canvas width
+    const maxCanvasHeight = 800; // Increased maximum canvas height
     
     // Calculate additional space needed for mats
     let additionalWidth = 0;
@@ -51,13 +51,13 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     
     if (matStyle === '1' && selectedMatBoard) {
       // Single mat - add space for mat width
-      const matPadding = matWidth * 50; // Convert cm to pixels (increased from 20 to 50)
+      const matPadding = matWidth * 20; // Convert cm to pixels (increased from 20 to 50)
       additionalWidth = matPadding * 2;
       additionalHeight = matPadding * 2;
     } else if (matStyle === '2' && selectedMatBoard && bottomSelectedMatBoard) {
       // Double mat - add space for both top mat and bottom mat
-      const topMatPadding = matWidth * 50; // Increased from 20 to 50
-      const bottomMatPadding = bottomMatWidth * 50; // Increased from 20 to 50
+      const topMatPadding = matWidth * 20; // Increased from 20 to 50
+      const bottomMatPadding = bottomMatWidth * 20; // Increased from 20 to 50
       additionalWidth = (topMatPadding + bottomMatPadding) * 2;
       additionalHeight = (topMatPadding + bottomMatPadding) * 2;
     }
@@ -77,28 +77,29 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     // Calculate frame dimensions based on image size
     const imageWidth = Number(width) || 0;
     const imageHeight = Number(height) || 0;
-    const frameWidth = frame.width * 50; // Convert cm to pixels (50px per cm for much bigger borders)
+    const frameWidth = frame.width * 30; // Convert cm to pixels (30px per cm for thicker borders)
     
-    // Calculate display size (maintain aspect ratio, fit in canvas)
-    // Use larger percentages for bigger canvas
-    const maxDisplayWidth = Math.min(canvasWidth * 0.7, 600); // Cap at 600px
-    const maxDisplayHeight = Math.min(canvasHeight * 0.6, 700); // Cap at 700px
-    const aspectRatio = imageWidth / imageHeight;
+    // Calculate display size to fill the entire canvas width
+    const padding = 10; // Minimal padding around the frame
+    const availableWidth = canvasWidth - (padding * 2) - (frameWidth * 2);
+    const availableHeight = canvasHeight - (padding * 2) - (frameWidth * 2);
     
-    let displayWidth, displayHeight;
-    if (aspectRatio > maxDisplayWidth / maxDisplayHeight) {
-      displayWidth = maxDisplayWidth;
-      displayHeight = displayWidth / aspectRatio;
-    } else {
-      displayHeight = maxDisplayHeight;
-      displayWidth = displayHeight * aspectRatio;
-    }
+    // Calculate scale factor to fit the image in available space
+    const scaleX = availableWidth / imageWidth;
+    const scaleY = availableHeight / imageHeight;
+    const scaleFactor = Math.min(scaleX, scaleY); // Use smaller scale to maintain aspect ratio
+    
+    let displayWidth = imageWidth * scaleFactor;
+    let displayHeight = imageHeight * scaleFactor;
 
-    // Center the frame
-    const frameX = (canvasWidth - displayWidth - frameWidth * 2) / 2;
-    const frameY = (canvasHeight - displayHeight - frameWidth * 2) / 2;
-    const totalFrameWidth = displayWidth + frameWidth * 2;
+    // Position frame to fill entire canvas width
+    const totalFrameWidth = canvasWidth - (padding * 2); // Fill entire canvas width
     const totalFrameHeight = displayHeight + frameWidth * 2;
+    const frameX = padding;
+    const frameY = (canvasHeight - totalFrameHeight) / 2; // Center vertically
+    
+    // Adjust display width to fill the frame
+    displayWidth = totalFrameWidth - (frameWidth * 2);
 
     // Draw shadow first
     ctx.save();
@@ -127,26 +128,26 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     }
 
     // Draw mat board based on mat style (draw this first, before picture box)
-    if (matStyle !== '0' && selectedMatBoard) {
+    if (matStyle !== '0' && selectedMatBoard && matWidth > 0) {
       drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle, bottomSelectedMatBoard, bottomMatWidth);
     }
 
-    // Calculate picture box coordinates (same for both image and no-image cases)
+    // Calculate picture box coordinates based on mat style
     let pictureBoxX = imageX;
     let pictureBoxY = imageY;
     let pictureBoxWidth = displayWidth;
     let pictureBoxHeight = displayHeight;
     
-    if (matStyle === '1' && selectedMatBoard) {
+    if (matStyle === '1' && selectedMatBoard && matWidth > 0) {
       // Single mat - use dynamic mat width
-      const matPadding = matWidth * 50; // Convert cm to pixels (50 pixels per cm)
+      const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
       pictureBoxX = imageX + matPadding;
       pictureBoxY = imageY + matPadding;
       pictureBoxWidth = displayWidth - (matPadding * 2);
       pictureBoxHeight = displayHeight - (matPadding * 2);
-    } else if (matStyle === '2' && selectedMatBoard) {
-      // Double mat - use dynamic mat width
-      const matPadding = matWidth * 50; // Convert cm to pixels (50 pixels per cm)
+    } else if (matStyle === '2' && selectedMatBoard && matWidth > 0) {
+      // Double mat - use same picture box size as single mat
+      const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
       pictureBoxX = imageX + matPadding;
       pictureBoxY = imageY + matPadding;
       pictureBoxWidth = displayWidth - (matPadding * 2);
@@ -293,7 +294,7 @@ const drawMatBoard = (
   bottomMatWidth: number
 ) => {
   // Calculate mat board dimensions from the matWidth prop
-  const matWidthPixels = matWidth * 50; // Convert cm to pixels (50 pixels per cm)
+  const matWidthPixels = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
   const matX = frameX + frameWidth;
   const matY = frameY + frameWidth;
   const matW = totalFrameWidth - (frameWidth * 2);
@@ -301,9 +302,11 @@ const drawMatBoard = (
 
   if (matStyle === '1') {
     // Single mat - draw one mat layer
+    console.log('Drawing single mat');
     drawSingleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard);
   } else if (matStyle === '2') {
     // Double mat - draw two mat layers with different colors
+    console.log('Drawing double mat');
     drawDoubleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard, bottomMatBoard, bottomMatWidth);
   }
 };
@@ -368,19 +371,50 @@ const drawDoubleMat = (
   bottomMatBoard: MatBoard | null,
   bottomMatWidth: number
 ) => {
-  // Double mat: top mat area + bottom mat box (10px bigger than picture box)
+  console.log('drawDoubleMat called with:', { matWidthPixels, bottomMatBoard, bottomMatWidth });
+  
+  // Double mat: use EXACT same logic as single mat
   const pictureBoxX = matX + matWidthPixels;
   const pictureBoxY = matY + matWidthPixels;
   const pictureBoxW = matW - (matWidthPixels * 2);
   const pictureBoxH = matH - (matWidthPixels * 2);
   
-  // 1. Fill mat area with top mat color
+  // 1. Fill mat area with top mat color (same as single mat)
   ctx.fillStyle = topMatBoard.color;
   ctx.fillRect(matX, matY, matW, matH);
   
-  // 2. Draw bottom mat box (if bottom mat is selected)
-  if (bottomMatBoard) {
-    const bottomMatBoxSize = bottomMatWidth * 50; // Convert cm to pixels (increased from 20 to 50) (20 pixels per cm)
+  // 2. Draw white border around the picture box (4px wide) - EXACT same as single mat
+  ctx.fillStyle = '#ffffff'; // White border
+  const borderWidth = 4; // 4px wide border
+  
+  // Top white border around picture box
+  ctx.fillRect(pictureBoxX - borderWidth, pictureBoxY - borderWidth, pictureBoxW + (borderWidth * 2), borderWidth);
+  // Bottom white border around picture box
+  ctx.fillRect(pictureBoxX - borderWidth, pictureBoxY + pictureBoxH, pictureBoxW + (borderWidth * 2), borderWidth);
+  // Left white border around picture box
+  ctx.fillRect(pictureBoxX - borderWidth, pictureBoxY - borderWidth, borderWidth, pictureBoxH + (borderWidth * 2));
+  // Right white border around picture box
+  ctx.fillRect(pictureBoxX + pictureBoxW, pictureBoxY - borderWidth, borderWidth, pictureBoxH + (borderWidth * 2));
+  
+  // 3. Add inner shadow effect on the white border around picture box - EXACT same as single mat
+  ctx.save();
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // More prominent shadow for 4px border
+  
+  // Inner shadow on the inside edges of the white border around picture box
+  // Top inner shadow
+  ctx.fillRect(pictureBoxX, pictureBoxY, pictureBoxW, 3);
+  // Bottom inner shadow
+  ctx.fillRect(pictureBoxX, pictureBoxY + pictureBoxH - 3, pictureBoxW, 3);
+  // Left inner shadow
+  ctx.fillRect(pictureBoxX, pictureBoxY, 3, pictureBoxH);
+  // Right inner shadow
+  ctx.fillRect(pictureBoxX + pictureBoxW - 3, pictureBoxY, 3, pictureBoxH);
+  
+  ctx.restore();
+  
+  // 4. Draw bottom mat box (if bottom mat is selected and width > 0) - this is the only difference
+  if (bottomMatBoard && bottomMatWidth > 0) {
+    const bottomMatBoxSize = bottomMatWidth * 10; // Convert cm to pixels (10 pixels per cm - even smaller bottom mat box)
     const bottomMatBoxX = pictureBoxX - bottomMatBoxSize;
     const bottomMatBoxY = pictureBoxY - bottomMatBoxSize;
     const bottomMatBoxW = pictureBoxW + (bottomMatBoxSize * 2);
@@ -628,12 +662,14 @@ const drawFrame = (
   };
 
   return (
-    <div className={`relative ${className}`} style={{ minHeight: '600px', padding: '40px' }}>
-      <canvas
-        ref={canvasRef}
-        className="w-full h-auto mx-auto block"
-        style={{ maxWidth: '600px', maxHeight: '800px' }}
-      />
+    <div className={`relative ${className}`} style={{ minHeight: '600px', padding: '40px', overflow: 'hidden' }}>
+      <div className="flex justify-center items-center h-full">
+        <canvas
+          ref={canvasRef}
+          className="block max-w-full max-h-full"
+          style={{ width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '500px' }}
+        />
+      </div>
     </div>
   );
 };

@@ -414,7 +414,12 @@ const drawDoubleMat = (
   
   // 4. Draw bottom mat box (if bottom mat is selected and width > 0) - this is the only difference
   if (bottomMatBoard && bottomMatWidth > 0) {
-    const bottomMatBoxSize = bottomMatWidth * 10; // Convert cm to pixels (10 pixels per cm - even smaller bottom mat box)
+    let bottomMatBoxSize = bottomMatWidth * 10; // Convert cm to pixels (10 pixels per cm - even smaller bottom mat box)
+    
+    // Limit bottom mat box size to not exceed the frame inner area
+    const maxBottomMatSize = Math.min(matW, matH) * 0.15; // Maximum 15% of the smaller frame dimension
+    bottomMatBoxSize = Math.min(bottomMatBoxSize, maxBottomMatSize);
+    
     const bottomMatBoxX = pictureBoxX - bottomMatBoxSize;
     const bottomMatBoxY = pictureBoxY - bottomMatBoxSize;
     const bottomMatBoxW = pictureBoxW + (bottomMatBoxSize * 2);

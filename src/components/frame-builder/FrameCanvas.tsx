@@ -10,6 +10,13 @@ interface FrameCanvasProps {
   matting: boolean;
   selectedMatBoard: MatBoard | null;
   matWidth: number;
+  matWidthType: 'uniform' | 'custom';
+  customWidths: {
+    top: string;
+    bottom: string;
+    left: string;
+    right: string;
+  };
   matStyle: '0' | '1' | '2'; // None, Single, Double
   bottomSelectedMatBoard: MatBoard | null;
   bottomMatWidth: number;
@@ -25,6 +32,8 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
   matting,
   selectedMatBoard,
   matWidth,
+  matWidthType,
+  customWidths,
   matStyle,
   bottomSelectedMatBoard,
   bottomMatWidth,
@@ -42,24 +51,47 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     // Calculate dynamic canvas size based on mat widths
     const baseCanvasWidth = 450; // Decreased width
     const baseCanvasHeight = 600; // Increased height more
-    const maxCanvasWidth = 650; // Reduced maximum canvas width
-    const maxCanvasHeight = 800; // Increased maximum canvas height
+    const maxCanvasWidth = 1200; // Increased maximum canvas width
+    const maxCanvasHeight = 1500; // Increased maximum canvas height
     
     // Calculate additional space needed for mats
     let additionalWidth = 0;
     let additionalHeight = 0;
     
     if (matStyle === '1' && selectedMatBoard) {
-      // Single mat - add space for mat width
-      const matPadding = matWidth * 20; // Convert cm to pixels (increased from 20 to 50)
-      additionalWidth = matPadding * 2;
-      additionalHeight = matPadding * 2;
-    } else if (matStyle === '2' && selectedMatBoard && bottomSelectedMatBoard) {
+      // Single mat - add space for mat width (uniform or custom)
+      if (matWidthType === 'custom') {
+        // Custom widths: use left+right for width, top+bottom for height
+        const leftWidth = (parseFloat(customWidths.left) || 0) * 20;
+        const rightWidth = (parseFloat(customWidths.right) || 0) * 20;
+        const topWidth = (parseFloat(customWidths.top) || 0) * 20;
+        const bottomWidth = (parseFloat(customWidths.bottom) || 0) * 20;
+        additionalWidth = leftWidth + rightWidth;
+        additionalHeight = topWidth + bottomWidth;
+      } else {
+        // Uniform width
+        const matPadding = (matWidth || 0) * 20; // Convert cm to pixels (20 pixels per cm)
+        additionalWidth = matPadding * 2;
+        additionalHeight = matPadding * 2;
+      }
+    } else if (matStyle === '2' && selectedMatBoard) {
       // Double mat - add space for both top mat and bottom mat
-      const topMatPadding = matWidth * 20; // Increased from 20 to 50
-      const bottomMatPadding = bottomMatWidth * 20; // Increased from 20 to 50
-      additionalWidth = (topMatPadding + bottomMatPadding) * 2;
-      additionalHeight = (topMatPadding + bottomMatPadding) * 2;
+      if (matWidthType === 'custom') {
+        // Custom widths: use left+right for width, top+bottom for height
+        const leftWidth = (parseFloat(customWidths.left) || 0) * 20;
+        const rightWidth = (parseFloat(customWidths.right) || 0) * 20;
+        const topWidth = (parseFloat(customWidths.top) || 0) * 20;
+        const bottomWidth = (parseFloat(customWidths.bottom) || 0) * 20;
+        const bottomMatPadding = (bottomMatWidth || 0) * 20;
+        additionalWidth = leftWidth + rightWidth + (bottomMatPadding * 2);
+        additionalHeight = topWidth + bottomWidth + (bottomMatPadding * 2);
+      } else {
+        // Uniform width
+        const topMatPadding = (matWidth || 0) * 20; // 20 pixels per cm
+        const bottomMatPadding = (bottomMatWidth || 0) * 20; // 20 pixels per cm
+        additionalWidth = (topMatPadding + bottomMatPadding) * 2;
+        additionalHeight = (topMatPadding + bottomMatPadding) * 2;
+      }
     }
     
     // Calculate final canvas size with limits
@@ -132,26 +164,52 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
       drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle, bottomSelectedMatBoard, bottomMatWidth);
     }
 
-    // Calculate picture box coordinates based on mat style
+    // Calculate picture box coordinates based on mat style and width type
     let pictureBoxX = imageX;
     let pictureBoxY = imageY;
     let pictureBoxWidth = displayWidth;
     let pictureBoxHeight = displayHeight;
     
     if (matStyle === '1' && selectedMatBoard && matWidth > 0) {
-      // Single mat - use dynamic mat width
-      const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
-      pictureBoxX = imageX + matPadding;
-      pictureBoxY = imageY + matPadding;
-      pictureBoxWidth = displayWidth - (matPadding * 2);
-      pictureBoxHeight = displayHeight - (matPadding * 2);
+      // Single mat - use dynamic mat width (uniform or custom)
+      if (matWidthType === 'custom') {
+        // Custom widths: use individual side widths
+        const leftPadding = parseFloat(customWidths.left) * 20;
+        const rightPadding = parseFloat(customWidths.right) * 20;
+        const topPadding = parseFloat(customWidths.top) * 20;
+        const bottomPadding = parseFloat(customWidths.bottom) * 20;
+        pictureBoxX = imageX + leftPadding;
+        pictureBoxY = imageY + topPadding;
+        pictureBoxWidth = displayWidth - (leftPadding + rightPadding);
+        pictureBoxHeight = displayHeight - (topPadding + bottomPadding);
+      } else {
+        // Uniform width
+        const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
+        pictureBoxX = imageX + matPadding;
+        pictureBoxY = imageY + matPadding;
+        pictureBoxWidth = displayWidth - (matPadding * 2);
+        pictureBoxHeight = displayHeight - (matPadding * 2);
+      }
     } else if (matStyle === '2' && selectedMatBoard && matWidth > 0) {
-      // Double mat - use same picture box size as single mat
-      const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
-      pictureBoxX = imageX + matPadding;
-      pictureBoxY = imageY + matPadding;
-      pictureBoxWidth = displayWidth - (matPadding * 2);
-      pictureBoxHeight = displayHeight - (matPadding * 2);
+      // Double mat - use dynamic mat width (uniform or custom)
+      if (matWidthType === 'custom') {
+        // Custom widths: use individual side widths
+        const leftPadding = parseFloat(customWidths.left) * 20;
+        const rightPadding = parseFloat(customWidths.right) * 20;
+        const topPadding = parseFloat(customWidths.top) * 20;
+        const bottomPadding = parseFloat(customWidths.bottom) * 20;
+        pictureBoxX = imageX + leftPadding;
+        pictureBoxY = imageY + topPadding;
+        pictureBoxWidth = displayWidth - (leftPadding + rightPadding);
+        pictureBoxHeight = displayHeight - (topPadding + bottomPadding);
+      } else {
+        // Uniform width
+        const matPadding = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
+        pictureBoxX = imageX + matPadding;
+        pictureBoxY = imageY + matPadding;
+        pictureBoxWidth = displayWidth - (matPadding * 2);
+        pictureBoxHeight = displayHeight - (matPadding * 2);
+      }
     }
 
     // Draw white background for picture box (always)
@@ -206,7 +264,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     // Draw size information like frameshop.com.au
     drawSizeInfo(ctx, imageX, imageY, displayWidth, displayHeight, width, height, units, frame);
 
-  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matStyle, bottomSelectedMatBoard, bottomMatWidth]);
+  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matWidthType, customWidths, matStyle, bottomSelectedMatBoard, bottomMatWidth]);
 
   const drawWoodGradientInnerShadow = (
     ctx: CanvasRenderingContext2D,
@@ -302,12 +360,12 @@ const drawMatBoard = (
 
   if (matStyle === '1') {
     // Single mat - draw one mat layer
-    console.log('Drawing single mat');
+    // console.log('Drawing single mat');
     drawSingleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard);
   } else if (matStyle === '2') {
     // Double mat - draw two mat layers with different colors
-    console.log('Drawing double mat');
-    drawDoubleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard, bottomMatBoard, bottomMatWidth);
+    // console.log('Drawing double mat');
+    drawDoubleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard, bottomMatBoard, bottomMatWidth, matWidthType, customWidths);
   }
 };
 
@@ -369,15 +427,32 @@ const drawDoubleMat = (
   matWidthPixels: number,
   topMatBoard: MatBoard,
   bottomMatBoard: MatBoard | null,
-  bottomMatWidth: number
+  bottomMatWidth: number,
+  matWidthType: 'uniform' | 'custom',
+  customWidths: { top: string; bottom: string; left: string; right: string; }
 ) => {
-  console.log('drawDoubleMat called with:', { matWidthPixels, bottomMatBoard, bottomMatWidth });
+  // console.log('drawDoubleMat called with:', { matWidthPixels, bottomMatBoard, bottomMatWidth });
   
-  // Double mat: use EXACT same logic as single mat
-  const pictureBoxX = matX + matWidthPixels;
-  const pictureBoxY = matY + matWidthPixels;
-  const pictureBoxW = matW - (matWidthPixels * 2);
-  const pictureBoxH = matH - (matWidthPixels * 2);
+  // Calculate picture box coordinates based on width type
+  let pictureBoxX, pictureBoxY, pictureBoxW, pictureBoxH;
+  
+  if (matWidthType === 'custom') {
+    // Custom widths: use individual side widths
+    const leftPadding = parseFloat(customWidths.left) * 20;
+    const rightPadding = parseFloat(customWidths.right) * 20;
+    const topPadding = parseFloat(customWidths.top) * 20;
+    const bottomPadding = parseFloat(customWidths.bottom) * 20;
+    pictureBoxX = matX + leftPadding;
+    pictureBoxY = matY + topPadding;
+    pictureBoxW = matW - (leftPadding + rightPadding);
+    pictureBoxH = matH - (topPadding + bottomPadding);
+  } else {
+    // Uniform width
+    pictureBoxX = matX + matWidthPixels;
+    pictureBoxY = matY + matWidthPixels;
+    pictureBoxW = matW - (matWidthPixels * 2);
+    pictureBoxH = matH - (matWidthPixels * 2);
+  }
   
   // 1. Fill mat area with top mat color (same as single mat)
   ctx.fillStyle = topMatBoard.color;
@@ -416,8 +491,10 @@ const drawDoubleMat = (
   if (bottomMatBoard && bottomMatWidth > 0) {
     let bottomMatBoxSize = bottomMatWidth * 10; // Convert cm to pixels (10 pixels per cm - even smaller bottom mat box)
     
-    // Limit bottom mat box size to not exceed the frame inner area
-    const maxBottomMatSize = Math.min(matW, matH) * 0.15; // Maximum 15% of the smaller frame dimension
+    // Limit bottom mat box size to not exceed the available mat area around picture box
+    const availableWidth = Math.min(matWidthPixels, pictureBoxW * 0.5); // Maximum half of picture box width
+    const availableHeight = Math.min(matWidthPixels, pictureBoxH * 0.5); // Maximum half of picture box height
+    const maxBottomMatSize = Math.min(availableWidth, availableHeight);
     bottomMatBoxSize = Math.min(bottomMatBoxSize, maxBottomMatSize);
     
     const bottomMatBoxX = pictureBoxX - bottomMatBoxSize;

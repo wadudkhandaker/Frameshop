@@ -172,6 +172,8 @@ const FrameBuilder: React.FC = () => {
                       parseFloat(customWidths.right) || 0
                     )
                 }
+                matWidthType={matWidthType}
+                customWidths={customWidths}
                 matStyle={matStyle}
                 bottomSelectedMatBoard={bottomSelectedMatBoard}
                 bottomMatWidth={parseFloat(bottomUniformWidth) || 2}

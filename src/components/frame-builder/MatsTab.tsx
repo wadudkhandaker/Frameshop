@@ -72,7 +72,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
   }, [bottomActiveMatCategory]);
 
   // Debug current matStyle
-  console.log('Current matStyle:', matStyle, 'selectedMatBoard:', selectedMatBoard);
+  // console.log('Current matStyle:', matStyle, 'selectedMatBoard:', selectedMatBoard);
 
   return (
     <div className="space-y-6">

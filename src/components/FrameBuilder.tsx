@@ -177,6 +177,7 @@ const FrameBuilder: React.FC = () => {
                 matStyle={matStyle}
                 bottomSelectedMatBoard={bottomSelectedMatBoard}
                 bottomMatWidth={parseFloat(bottomUniformWidth) || 2}
+                vGroove={vGroove}
                 className="w-full"
               />
             </div>

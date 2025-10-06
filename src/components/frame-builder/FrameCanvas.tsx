@@ -20,6 +20,7 @@ interface FrameCanvasProps {
   matStyle: '0' | '1' | '2'; // None, Single, Double
   bottomSelectedMatBoard: MatBoard | null;
   bottomMatWidth: number;
+  vGroove: boolean;
   className?: string;
 }
 
@@ -37,6 +38,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
   matStyle,
   bottomSelectedMatBoard,
   bottomMatWidth,
+  vGroove,
   className = ''
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -161,7 +163,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
 
     // Draw mat board based on mat style (draw this first, before picture box)
     if (matStyle !== '0' && selectedMatBoard && matWidth > 0) {
-      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle, bottomSelectedMatBoard, bottomMatWidth);
+      drawMatBoard(ctx, frameX, frameY, totalFrameWidth, totalFrameHeight, frameWidth, matWidth, selectedMatBoard, matStyle, bottomSelectedMatBoard, bottomMatWidth, vGroove);
     }
 
     // Calculate picture box coordinates based on mat style and width type
@@ -264,7 +266,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     // Draw size information like frameshop.com.au
     drawSizeInfo(ctx, imageX, imageY, displayWidth, displayHeight, width, height, units, frame);
 
-  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matWidthType, customWidths, matStyle, bottomSelectedMatBoard, bottomMatWidth]);
+  }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matWidthType, customWidths, matStyle, bottomSelectedMatBoard, bottomMatWidth, vGroove]);
 
   const drawWoodGradientInnerShadow = (
     ctx: CanvasRenderingContext2D,
@@ -349,7 +351,8 @@ const drawMatBoard = (
   matBoard: MatBoard,
   matStyle: '0' | '1' | '2',
   bottomMatBoard: MatBoard | null,
-  bottomMatWidth: number
+  bottomMatWidth: number,
+  vGroove: boolean
 ) => {
   // Calculate mat board dimensions from the matWidth prop
   const matWidthPixels = matWidth * 20; // Convert cm to pixels (20 pixels per cm)
@@ -361,11 +364,11 @@ const drawMatBoard = (
   if (matStyle === '1') {
     // Single mat - draw one mat layer
     // console.log('Drawing single mat');
-    drawSingleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard);
+    drawSingleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard, vGroove);
   } else if (matStyle === '2') {
     // Double mat - draw two mat layers with different colors
     // console.log('Drawing double mat');
-    drawDoubleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard, bottomMatBoard, bottomMatWidth, matWidthType, customWidths);
+    drawDoubleMat(ctx, matX, matY, matW, matH, matWidthPixels, matBoard, bottomMatBoard, bottomMatWidth, matWidthType, customWidths, vGroove);
   }
 };
 
@@ -376,7 +379,8 @@ const drawSingleMat = (
   matW: number,
   matH: number,
   matWidthPixels: number,
-  matBoard: MatBoard
+  matBoard: MatBoard,
+  vGroove: boolean
 ) => {
   // Draw single mat: white border (bigger) + mat area with top mat color
   const pictureBoxX = matX + matWidthPixels;
@@ -416,6 +420,24 @@ const drawSingleMat = (
   ctx.fillRect(pictureBoxX + pictureBoxW - 3, pictureBoxY, 3, pictureBoxH);
   
   ctx.restore();
+  
+  // Draw V-Groove effect if enabled (white border box with 50px gap from picture box)
+  if (vGroove) {
+    ctx.save();
+    ctx.strokeStyle = '#ffffff'; // White border
+    ctx.lineWidth = 4;
+    
+    // Calculate V-Groove coordinates (35px gap around picture box)
+    const vGrooveGap = 35;
+    const vGrooveX = pictureBoxX - vGrooveGap;
+    const vGrooveY = pictureBoxY - vGrooveGap;
+    const vGrooveW = pictureBoxW + (vGrooveGap * 2);
+    const vGrooveH = pictureBoxH + (vGrooveGap * 2);
+    
+    // Draw V-Groove rectangle (white border only, no fill)
+    ctx.strokeRect(vGrooveX, vGrooveY, vGrooveW, vGrooveH);
+    ctx.restore();
+  }
 };
 
 const drawDoubleMat = (
@@ -429,7 +451,8 @@ const drawDoubleMat = (
   bottomMatBoard: MatBoard | null,
   bottomMatWidth: number,
   matWidthType: 'uniform' | 'custom',
-  customWidths: { top: string; bottom: string; left: string; right: string; }
+  customWidths: { top: string; bottom: string; left: string; right: string; },
+  vGroove: boolean
 ) => {
   // console.log('drawDoubleMat called with:', { matWidthPixels, bottomMatBoard, bottomMatWidth });
   
@@ -488,6 +511,9 @@ const drawDoubleMat = (
   ctx.restore();
   
   // 4. Draw bottom mat box (if bottom mat is selected and width > 0) - this is the only difference
+  // Declare bottom mat box variables outside the if block so they're accessible for V-Groove
+  let bottomMatBoxX = 0, bottomMatBoxY = 0, bottomMatBoxW = 0, bottomMatBoxH = 0;
+  
   if (bottomMatBoard && bottomMatWidth > 0) {
     let bottomMatBoxSize = bottomMatWidth * 10; // Convert cm to pixels (10 pixels per cm - even smaller bottom mat box)
     
@@ -497,10 +523,10 @@ const drawDoubleMat = (
     const maxBottomMatSize = Math.min(availableWidth, availableHeight);
     bottomMatBoxSize = Math.min(bottomMatBoxSize, maxBottomMatSize);
     
-    const bottomMatBoxX = pictureBoxX - bottomMatBoxSize;
-    const bottomMatBoxY = pictureBoxY - bottomMatBoxSize;
-    const bottomMatBoxW = pictureBoxW + (bottomMatBoxSize * 2);
-    const bottomMatBoxH = pictureBoxH + (bottomMatBoxSize * 2);
+    bottomMatBoxX = pictureBoxX - bottomMatBoxSize;
+    bottomMatBoxY = pictureBoxY - bottomMatBoxSize;
+    bottomMatBoxW = pictureBoxW + (bottomMatBoxSize * 2);
+    bottomMatBoxH = pictureBoxH + (bottomMatBoxSize * 2);
     
     // Fill bottom mat box with bottom mat color
     ctx.fillStyle = bottomMatBoard.color;
@@ -518,6 +544,36 @@ const drawDoubleMat = (
     ctx.fillRect(bottomMatBoxX - whiteBorderWidth, bottomMatBoxY - whiteBorderWidth, whiteBorderWidth, bottomMatBoxH + (whiteBorderWidth * 2));
     // Right white border
     ctx.fillRect(bottomMatBoxX + bottomMatBoxW, bottomMatBoxY - whiteBorderWidth, whiteBorderWidth, bottomMatBoxH + (whiteBorderWidth * 2));
+  }
+  
+  // Draw V-Groove effect if enabled (white border box with 50px gap from bottom mat box or picture box)
+  if (vGroove) {
+    ctx.save();
+    ctx.strokeStyle = '#ffffff'; // White border
+    ctx.lineWidth = 4;
+    
+    // Calculate V-Groove coordinates based on whether bottom mat exists
+    let vGrooveX, vGrooveY, vGrooveW, vGrooveH;
+    
+    if (bottomMatBoard && bottomMatWidth > 0) {
+      // For double mat: V-Groove around bottom mat box with 35px gap
+      const vGrooveGap = 35;
+      vGrooveX = bottomMatBoxX - vGrooveGap;
+      vGrooveY = bottomMatBoxY - vGrooveGap;
+      vGrooveW = bottomMatBoxW + (vGrooveGap * 2);
+      vGrooveH = bottomMatBoxH + (vGrooveGap * 2);
+    } else {
+      // For single mat: V-Groove around picture box with 35px gap
+      const vGrooveGap = 35;
+      vGrooveX = pictureBoxX - vGrooveGap;
+      vGrooveY = pictureBoxY - vGrooveGap;
+      vGrooveW = pictureBoxW + (vGrooveGap * 2);
+      vGrooveH = pictureBoxH + (vGrooveGap * 2);
+    }
+    
+    // Draw V-Groove rectangle (white border only, no fill)
+    ctx.strokeRect(vGrooveX, vGrooveY, vGrooveW, vGrooveH);
+    ctx.restore();
   }
 };
 

@@ -263,8 +263,8 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     }
     ctx.restore();
 
-    // Draw size information like frameshop.com.au
-    drawSizeInfo(ctx, imageX, imageY, displayWidth, displayHeight, width, height, units, frame);
+    // Draw size information like frameshop.com.au - use actual picture box dimensions
+    drawSizeInfo(ctx, pictureBoxX, pictureBoxY, pictureBoxWidth, pictureBoxHeight, displayWidth, displayHeight, width, height, units, frame);
 
   }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matWidthType, customWidths, matStyle, bottomSelectedMatBoard, bottomMatWidth, vGroove]);
 
@@ -755,40 +755,46 @@ const drawFrame = (
 
   const drawSizeInfo = (
     ctx: CanvasRenderingContext2D,
-    imageX: number,
-    imageY: number,
+    pictureBoxX: number,
+    pictureBoxY: number,
+    pictureBoxWidth: number,
+    pictureBoxHeight: number,
     displayWidth: number,
     displayHeight: number,
-    width: number,
-    height: number,
+    originalWidth: number,
+    originalHeight: number,
     units: string,
     frame: Frame
   ) => {
-    // Ensure width and height are numbers
-    const numWidth = Number(width) || 0;
-    const numHeight = Number(height) || 0;
+    // Calculate the actual picture box dimensions in the original units
+    // The picture box dimensions change based on mat configurations
+    const numOriginalWidth = Number(originalWidth) || 0;
+    const numOriginalHeight = Number(originalHeight) || 0;
     
-    // Calculate sizes like frameshop.com.au
-    const imageSize = `${numWidth} x ${numHeight} ${units}`;
-    const rebateSize = frame.rebate * 2;
-    const visibleWidth = numWidth - rebateSize;
-    const visibleHeight = numHeight - rebateSize;
-    const visibleSize = `${visibleWidth.toFixed(1)} x ${visibleHeight.toFixed(1)} ${units}`;
-    const outsideWidth = numWidth + (frame.width * 2);
-    const outsideHeight = numHeight + (frame.width * 2);
-    const outsideSize = `${outsideWidth.toFixed(1)} x ${outsideHeight.toFixed(1)} ${units}`;
+    // Calculate the scale factor from original dimensions to display dimensions
+    // This helps us convert pixel dimensions back to original units
+    const scaleFactorX = displayWidth / numOriginalWidth;
+    const scaleFactorY = displayHeight / numOriginalHeight;
+    const scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+    
+    // Convert current picture box dimensions back to original units
+    const pictureBoxWidthUnits = pictureBoxWidth / scaleFactor;
+    const pictureBoxHeightUnits = pictureBoxHeight / scaleFactor;
+    
+    // Display the actual picture box size (changes with mat configuration)
+    const pictureBoxSize = `${pictureBoxWidthUnits.toFixed(1)} x ${pictureBoxHeightUnits.toFixed(1)} ${units}`;
 
-    // Draw size information in the center
+    // Draw size information in the center of the picture box
     ctx.fillStyle = '#666666';
     ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'center';
     
-    const centerX = imageX + displayWidth / 2;
-    const centerY = imageY + displayHeight / 2;
+    const centerX = pictureBoxX + pictureBoxWidth / 2;
+    const centerY = pictureBoxY + pictureBoxHeight / 2;
     
-    ctx.fillText(`Image Size: ${imageSize}`, centerX, centerY - 20);
-    ctx.fillText(`Visible (approx): ${visibleSize}`, centerX, centerY);
-    ctx.fillText(`Outside (approx): ${outsideSize}`, centerX, centerY + 20);
+    // Display the actual picture box size
+    ctx.fillText(`Picture Box: ${pictureBoxSize}`, centerX, centerY - 10);
+    ctx.fillText(`Frame: ${frame.style_code || frame.code}`, centerX, centerY + 10);
   };
 
   const adjustColor = (color: string, amount: number): string => {

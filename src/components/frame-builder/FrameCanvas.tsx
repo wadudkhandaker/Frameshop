@@ -766,23 +766,24 @@ const drawFrame = (
     units: string,
     frame: Frame
   ) => {
-    // Calculate the actual picture box dimensions in the original units
-    // The picture box dimensions change based on mat configurations
+    // Calculate the three different size measurements like frameshop.com.au
     const numOriginalWidth = Number(originalWidth) || 0;
     const numOriginalHeight = Number(originalHeight) || 0;
     
-    // Calculate the scale factor from original dimensions to display dimensions
-    // This helps us convert pixel dimensions back to original units
-    const scaleFactorX = displayWidth / numOriginalWidth;
-    const scaleFactorY = displayHeight / numOriginalHeight;
-    const scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+    // 1. Image Size: Original image dimensions
+    const imageSize = `${numOriginalWidth.toFixed(1)} x ${numOriginalHeight.toFixed(1)} ${units}`;
     
-    // Convert current picture box dimensions back to original units
-    const pictureBoxWidthUnits = pictureBoxWidth / scaleFactor;
-    const pictureBoxHeightUnits = pictureBoxHeight / scaleFactor;
+    // 2. Visible (approx): Image size minus rebate (frame overlap)
+    const rebateSize = frame.rebate * 2; // Rebate affects both sides
+    const visibleWidth = numOriginalWidth - rebateSize;
+    const visibleHeight = numOriginalHeight - rebateSize;
+    const visibleSize = `${visibleWidth.toFixed(1)} x ${visibleHeight.toFixed(1)} ${units}`;
     
-    // Display the actual picture box size (changes with mat configuration)
-    const pictureBoxSize = `${pictureBoxWidthUnits.toFixed(1)} x ${pictureBoxHeightUnits.toFixed(1)} ${units}`;
+    // 3. Outside (approx): Image size plus frame width
+    const frameWidthTotal = frame.width * 2; // Frame width on both sides
+    const outsideWidth = numOriginalWidth + frameWidthTotal;
+    const outsideHeight = numOriginalHeight + frameWidthTotal;
+    const outsideSize = `${outsideWidth.toFixed(1)} x ${outsideHeight.toFixed(1)} ${units}`;
 
     // Draw size information in the center of the picture box
     ctx.fillStyle = '#666666';
@@ -792,9 +793,10 @@ const drawFrame = (
     const centerX = pictureBoxX + pictureBoxWidth / 2;
     const centerY = pictureBoxY + pictureBoxHeight / 2;
     
-    // Display the actual picture box size
-    ctx.fillText(`Picture Box: ${pictureBoxSize}`, centerX, centerY - 10);
-    ctx.fillText(`Frame: ${frame.style_code || frame.code}`, centerX, centerY + 10);
+    // Display the three size measurements like frameshop.com.au
+    ctx.fillText(`Image Size: ${imageSize}`, centerX, centerY - 20);
+    ctx.fillText(`Visible (approx): ${visibleSize}`, centerX, centerY);
+    ctx.fillText(`Outside (approx): ${outsideSize}`, centerX, centerY + 20);
   };
 
   const adjustColor = (color: string, amount: number): string => {

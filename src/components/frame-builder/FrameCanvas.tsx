@@ -111,7 +111,10 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     // Calculate frame dimensions based on image size
     const imageWidth = Number(width) || 0;
     const imageHeight = Number(height) || 0;
-    const frameWidth = frame.width * 30; // Convert cm to pixels (30px per cm for thicker borders)
+    
+    // For Float for Canvas, use smaller frame width
+    const isFloatCanvas = frame.material === 'Floating';
+    const frameWidth = isFloatCanvas ? frame.width * 15 : frame.width * 30; // Smaller border for float canvas
     
     // Calculate display size to fill the entire canvas width
     const padding = 10; // Minimal padding around the frame
@@ -154,11 +157,13 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     const imageX = frameX + frameWidth;
     const imageY = frameY + frameWidth;
 
-    // Draw inner shadow based on frame material
-    if (frame.material === 'Wood') {
-      drawWoodGradientInnerShadow(ctx, imageX, imageY, displayWidth, displayHeight);
-    } else {
-      drawStandardInnerShadow(ctx, imageX, imageY, displayWidth, displayHeight);
+    // Draw inner shadow based on frame material (skip for float canvas)
+    if (!isFloatCanvas) {
+      if (frame.material === 'Wood') {
+        drawWoodGradientInnerShadow(ctx, imageX, imageY, displayWidth, displayHeight);
+      } else {
+        drawStandardInnerShadow(ctx, imageX, imageY, displayWidth, displayHeight);
+      }
     }
 
     // Draw mat board based on mat style (draw this first, before picture box)
@@ -172,7 +177,29 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     let pictureBoxWidth = displayWidth;
     let pictureBoxHeight = displayHeight;
     
-    if (matStyle === '1' && selectedMatBoard && matWidth > 0) {
+    // For Float for Canvas: add 15px gap, picture size same as frame inner size
+    if (isFloatCanvas) {
+      const floatGap = 15; // 15px gap between picture and frame
+      
+      // Draw the gap area with a subtle background color
+      ctx.fillStyle = '#f5f5f5'; // Light gray for the gap
+      ctx.fillRect(imageX, imageY, displayWidth, displayHeight);
+      
+      // Add subtle inner shadow in the gap to create depth
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.fillStyle = '#f5f5f5';
+      ctx.fillRect(imageX, imageY, displayWidth, displayHeight);
+      ctx.restore();
+      
+      pictureBoxX = imageX + floatGap;
+      pictureBoxY = imageY + floatGap;
+      pictureBoxWidth = displayWidth - (floatGap * 2);
+      pictureBoxHeight = displayHeight - (floatGap * 2);
+    } else if (matStyle === '1' && selectedMatBoard && matWidth > 0) {
       // Single mat - use dynamic mat width (uniform or custom)
       if (matWidthType === 'custom') {
         // Custom widths: use individual side widths

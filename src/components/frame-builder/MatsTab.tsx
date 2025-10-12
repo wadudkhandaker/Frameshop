@@ -11,6 +11,7 @@ interface MatsTabProps {
   vGroove: boolean;
   setVGroove: (groove: boolean) => void;
   is3DFrame: boolean;
+  isFloatingFrame: boolean;
   activeMatCategory: MatCategory;
   setActiveMatCategory: (category: MatCategory) => void;
   selectedMatBoard: MatBoard | null;
@@ -48,6 +49,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
   vGroove,
   setVGroove,
   is3DFrame,
+  isFloatingFrame,
   activeMatCategory,
   setActiveMatCategory,
   selectedMatBoard,
@@ -78,8 +80,8 @@ const MatsTab: React.FC<MatsTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* 3D Frame Notice */}
-      {is3DFrame && (
+      {/* 3D Frame or Floating Frame Notice */}
+      {(is3DFrame || isFloatingFrame) && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -87,10 +89,10 @@ const MatsTab: React.FC<MatsTabProps> = ({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-blue-800">
-                3D Frame Selected
+                {is3DFrame ? '3D Frame' : 'Float for Canvas'} Selected
               </h3>
               <div className="mt-1 text-sm text-blue-700">
-                Mat options are not available for 3D frames as they create their own dimensional effect.
+                Mat options are not available for {is3DFrame ? '3D frames' : 'float canvas frames'} as they create their own dimensional effect.
               </div>
             </div>
           </div>
@@ -108,7 +110,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
                 value="1"
                 checked={matStyle === '1'}
                 onChange={(e) => setMatStyle(e.target.value as MatStyle)}
-                disabled={is3DFrame}
+                disabled={is3DFrame || isFloatingFrame}
                 className="mr-3 text-amber-600"
               />
               Single
@@ -122,7 +124,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
                   console.log('Setting matStyle to:', e.target.value);
                   setMatStyle(e.target.value as MatStyle);
                 }}
-                disabled={is3DFrame}
+                disabled={is3DFrame || isFloatingFrame}
                 className="mr-3 text-amber-600"
               />
               Double
@@ -136,7 +138,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
                   console.log('Setting matStyle to:', e.target.value);
                   setMatStyle(e.target.value as MatStyle);
                 }}
-                disabled={is3DFrame}
+                disabled={is3DFrame || isFloatingFrame}
                 className="mr-3 text-amber-600"
               />
               None
@@ -151,7 +153,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
               value={imageOverlap}
               onChange={(e) => setImageOverlap(e.target.value as ImageOverlap)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-              disabled={matStyle === '0' || is3DFrame}
+              disabled={matStyle === '0' || is3DFrame || isFloatingFrame}
             >
               <option value="PHOTO">On</option>
               <option value="EXACT">Off</option>
@@ -178,6 +180,7 @@ const MatsTab: React.FC<MatsTabProps> = ({
                   type="checkbox"
                   checked={vGroove}
                   onChange={(e) => setVGroove(e.target.checked)}
+                  disabled={is3DFrame || isFloatingFrame}
                   className="mr-2 text-amber-600"
                 />
                 V Groove

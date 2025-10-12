@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Search, Star, DollarSign, Info, Palette, Crown, Zap, Heart, Sparkles, Gem, TreePine, Home, Clock, Award, Coffee, Sun, Moon, Waves, Flower2, Diamond, Shield, Box } from 'lucide-react';
+import { Search, Star, DollarSign, Info, Palette, Crown, Zap, Heart, Sparkles, Gem, TreePine, Home, Clock, Award, Coffee, Sun, Moon, Waves, Flower2, Diamond, Shield, Box, Image } from 'lucide-react';
 import { Frame } from './types';
 import { categories } from './data';
 import { FrameCard } from './FrameCard';
@@ -89,6 +89,7 @@ const FramesTab: React.FC<FramesTabProps> = ({
       'Popular': <Star className="w-3 h-3" />,
       'On Sale': <DollarSign className="w-3 h-3" />,
       '3D Frame': <Box className="w-3 h-3" />,
+      'Float for Canvas': <Image className="w-3 h-3" />,
       'Black': <Palette className="w-3 h-3" />,
       'White': <Palette className="w-3 h-3" />,
       'Raw Timber': <TreePine className="w-3 h-3" />,

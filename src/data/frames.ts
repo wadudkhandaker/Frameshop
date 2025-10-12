@@ -59,6 +59,12 @@ export const frames: Frame[] = [
   { id: '3D-003', code: '3D-OAK', name: 'Oak 3D Box', width: 0, depth: 3, rebate: 0, material: '3D', color: 'Oak', priceRate: 9, category: ['3D Frame'] },
   { id: '3D-004', code: '3D-SILVER', name: 'Silver 3D Box', width: 0, depth: 2, rebate: 0, material: '3D', color: 'Silver', priceRate: 10, category: ['3D Frame'] },
   { id: '3D-005', code: '3D-GOLD', name: 'Gold 3D Box', width: 0, depth: 2, rebate: 0, material: '3D', color: 'Gold', priceRate: 12, category: ['3D Frame'] },
+
+  // Float for Canvas
+  { id: 'FLOAT-001', code: 'FLOAT-BLACK', name: 'Black Float Canvas', width: 3, depth: 2, rebate: 0.5, material: 'Floating', color: 'Black', priceRate: 12, category: ['Float for Canvas'] },
+  { id: 'FLOAT-002', code: 'FLOAT-WHITE', name: 'White Float Canvas', width: 3, depth: 2, rebate: 0.5, material: 'Floating', color: 'White', priceRate: 12, category: ['Float for Canvas'] },
+  { id: 'FLOAT-003', code: 'FLOAT-OAK', name: 'Oak Float Canvas', width: 3, depth: 2, rebate: 0.5, material: 'Floating', color: 'Oak', priceRate: 15, category: ['Float for Canvas'] },
+  { id: 'FLOAT-004', code: 'FLOAT-GOLD', name: 'Gold Float Canvas', width: 3, depth: 2, rebate: 0.5, material: 'Floating', color: 'Gold', priceRate: 18, category: ['Float for Canvas'] },
 ];
 
 export const standardSizes: StandardSize[] = [
@@ -86,6 +92,7 @@ export const frameCategories = [
   { id: 'popular', name: 'Popular', icon: '⭐' },
   { id: 'on-sale', name: 'On Sale', icon: '$' },
   { id: '3d-frame', name: '3D Frame', icon: '📦' },
+  { id: 'float-for-canvas', name: 'Float for Canvas', icon: '🖼️' },
   { id: 'aluminium', name: 'Aluminium', icon: '' },
   { id: 'black', name: 'Black', icon: '' },
   { id: 'white', name: 'White', icon: '' },

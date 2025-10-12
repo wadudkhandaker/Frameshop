@@ -80,6 +80,7 @@ export const categories = [
   { name: 'Popular', icon: 'star' },
   { name: 'On Sale', icon: 'dollar' },
   { name: '3D Frame', icon: 'box' },
+  { name: 'Float for Canvas', icon: 'image' },
   { name: 'Aluminium', icon: null },
   { name: 'Black', icon: null },
   { name: 'White', icon: null },
@@ -87,6 +88,5 @@ export const categories = [
   { name: 'Stains', icon: null },
   { name: 'Gold', icon: null },
   { name: 'Silver', icon: null },
-  { name: 'Raw Timber', icon: null },
-  { name: 'Float for Canvas', icon: null }
+  { name: 'Raw Timber', icon: null }
 ];

@@ -52,7 +52,8 @@ const FrameBuilder: React.FC = () => {
   // Auto-switch away from mats tab when 3D frame is selected
   useEffect(() => {
     const is3DFrame = selectedFrame?.material === '3D';
-    if (is3DFrame && activeTab === 'mats') {
+    const isFloatingFrame = selectedFrame?.material === 'Floating';
+    if ((is3DFrame || isFloatingFrame) && activeTab === 'mats') {
       setActiveTab('frames');
     }
   }, [selectedFrame, activeTab]);
@@ -320,7 +321,8 @@ const FrameBuilder: React.FC = () => {
                     { id: 'extras', label: 'Extras' }
                   ].map((tab) => {
                     const is3DFrame = selectedFrame?.material === '3D';
-                    const isDisabled = tab.id === 'mats' && is3DFrame;
+                    const isFloatingFrame = selectedFrame?.material === 'Floating';
+                    const isDisabled = tab.id === 'mats' && (is3DFrame || isFloatingFrame);
                     
                     return (
                       <li key={tab.id} className="flex-1">
@@ -368,6 +370,7 @@ const FrameBuilder: React.FC = () => {
                     vGroove={vGroove}
                     setVGroove={setVGroove}
                     is3DFrame={selectedFrame?.material === '3D'}
+                    isFloatingFrame={selectedFrame?.material === 'Floating'}
                     activeMatCategory={activeMatCategory}
                     setActiveMatCategory={setActiveMatCategory}
                     selectedMatBoard={selectedMatBoard}

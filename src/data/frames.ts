@@ -52,6 +52,13 @@ export const frames: Frame[] = [
   { id: 'C001', code: 'C001', name: 'C001', width: 2, depth: 2, rebate: 0.5, material: 'Wood', color: 'Red', priceRate: 4, category: ['Colourful'] },
   { id: 'C002', code: 'C002', name: 'C002', width: 2, depth: 2, rebate: 0.5, material: 'Wood', color: 'Blue', priceRate: 4, category: ['Colourful'] },
   { id: 'C003', code: 'C003', name: 'C003', width: 2, depth: 2, rebate: 0.5, material: 'Wood', color: 'Green', priceRate: 4, category: ['Colourful'] },
+  
+  // 3D Frames (Gallery Wrap / Box Frames)
+  { id: '3D-001', code: '3D-BLACK', name: 'Black 3D Box', width: 0, depth: 3, rebate: 0, material: '3D', color: 'Black', priceRate: 8, category: ['3D Frame'] },
+  { id: '3D-002', code: '3D-WHITE', name: 'White 3D Box', width: 0, depth: 3, rebate: 0, material: '3D', color: 'White', priceRate: 8, category: ['3D Frame'] },
+  { id: '3D-003', code: '3D-OAK', name: 'Oak 3D Box', width: 0, depth: 3, rebate: 0, material: '3D', color: 'Oak', priceRate: 9, category: ['3D Frame'] },
+  { id: '3D-004', code: '3D-SILVER', name: 'Silver 3D Box', width: 0, depth: 2, rebate: 0, material: '3D', color: 'Silver', priceRate: 10, category: ['3D Frame'] },
+  { id: '3D-005', code: '3D-GOLD', name: 'Gold 3D Box', width: 0, depth: 2, rebate: 0, material: '3D', color: 'Gold', priceRate: 12, category: ['3D Frame'] },
 ];
 
 export const standardSizes: StandardSize[] = [
@@ -78,6 +85,7 @@ export const standardSizes: StandardSize[] = [
 export const frameCategories = [
   { id: 'popular', name: 'Popular', icon: '⭐' },
   { id: 'on-sale', name: 'On Sale', icon: '$' },
+  { id: '3d-frame', name: '3D Frame', icon: '📦' },
   { id: 'aluminium', name: 'Aluminium', icon: '' },
   { id: 'black', name: 'Black', icon: '' },
   { id: 'white', name: 'White', icon: '' },

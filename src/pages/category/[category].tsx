@@ -134,3 +134,19 @@ export default function CategoryPage() {
     </>
   );
 }
+
+// Required for Next.js static export
+export async function getStaticPaths() {
+  // Return empty paths to generate pages on-demand
+  return {
+    paths: [],
+    fallback: 'blocking', // or 'blocking' for SSR on first request
+  };
+}
+
+export async function getStaticProps() {
+  // Return empty props since we're using client-side data fetching
+  return {
+    props: {},
+  };
+}

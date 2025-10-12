@@ -79,6 +79,7 @@ export const categories = [
   { name: 'All', icon: null },
   { name: 'Popular', icon: 'star' },
   { name: 'On Sale', icon: 'dollar' },
+  { name: '3D Frame', icon: 'box' },
   { name: 'Aluminium', icon: null },
   { name: 'Black', icon: null },
   { name: 'White', icon: null },

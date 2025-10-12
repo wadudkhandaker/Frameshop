@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Frame, 
   MatBoard, 
@@ -14,6 +14,7 @@ import FramesTab from './frame-builder/FramesTab';
 import MatsTab from './frame-builder/MatsTab';
 import ImageUploader from './frame-builder/ImageUploader';
 import { FrameCanvas } from './frame-builder/FrameCanvas';
+import { FrameCanvas3D } from './frame-builder/FrameCanvas3D';
 import PricingEngine from './frame-builder/PricingEngine';
 import MaterialOptions from './frame-builder/MaterialOptions';
 import GlassOptions from './frame-builder/GlassOptions';
@@ -35,6 +36,11 @@ const FrameBuilder: React.FC = () => {
 
   // Frame selection states
   const [selectedFrame, setSelectedFrame] = useState<Frame | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState('Popular');
+  const [sortBy, setSortBy] = useState('width-asc');
+  const [hideUnsuitableFrames, setHideUnsuitableFrames] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabType>('frames');
   
   // Auto-select first frame for testing
   React.useEffect(() => {
@@ -42,11 +48,14 @@ const FrameBuilder: React.FC = () => {
       setSelectedFrame(frames[0]);
     }
   }, [frames, selectedFrame]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState('Popular');
-  const [sortBy, setSortBy] = useState('width-asc');
-  const [hideUnsuitableFrames, setHideUnsuitableFrames] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('frames');
+
+  // Auto-switch away from mats tab when 3D frame is selected
+  useEffect(() => {
+    const is3DFrame = selectedFrame?.material === '3D';
+    if (is3DFrame && activeTab === 'mats') {
+      setActiveTab('frames');
+    }
+  }, [selectedFrame, activeTab]);
   
   // Image upload states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -155,31 +164,43 @@ const FrameBuilder: React.FC = () => {
           {/* Left Column - Canvas Preview */}
           <div className="order-2 lg:order-1">
             <div className="sticky top-8">
-              <FrameCanvas
-                width={parseFloat(imageWidth) || 0}
-                height={parseFloat(imageHeight) || 0}
-                units={units}
-                frame={selectedFrame}
-                image={uploadedImage}
-                matting={selectedMatBoard !== null}
-              selectedMatBoard={selectedMatBoard}
-                matWidth={matWidthType === 'uniform' 
-                  ? parseFloat(uniformWidth) || 0
-                  : Math.max(
-                      parseFloat(customWidths.top) || 0,
-                      parseFloat(customWidths.bottom) || 0,
-                      parseFloat(customWidths.left) || 0,
-                      parseFloat(customWidths.right) || 0
-                    )
-                }
+              {/* Conditional rendering: 3D Canvas for 3D frames, regular Canvas for others */}
+              {selectedFrame?.material === '3D' ? (
+                <FrameCanvas3D
+                  width={parseFloat(imageWidth) || 0}
+                  height={parseFloat(imageHeight) || 0}
+                  units={units}
+                  frame={selectedFrame}
+                  image={uploadedImage}
+                  className="w-full"
+                />
+              ) : (
+                <FrameCanvas
+                  width={parseFloat(imageWidth) || 0}
+                  height={parseFloat(imageHeight) || 0}
+                  units={units}
+                  frame={selectedFrame}
+                  image={uploadedImage}
+                  matting={selectedMatBoard !== null}
+                selectedMatBoard={selectedMatBoard}
+                  matWidth={matWidthType === 'uniform' 
+                    ? parseFloat(uniformWidth) || 0
+                    : Math.max(
+                        parseFloat(customWidths.top) || 0,
+                        parseFloat(customWidths.bottom) || 0,
+                        parseFloat(customWidths.left) || 0,
+                        parseFloat(customWidths.right) || 0
+                      )
+                  }
                 matWidthType={matWidthType}
                 customWidths={customWidths}
-                matStyle={matStyle}
-                bottomSelectedMatBoard={bottomSelectedMatBoard}
-                bottomMatWidth={parseFloat(bottomUniformWidth) || 2}
-                vGroove={vGroove}
-                className="w-full"
-              />
+                  matStyle={matStyle}
+                  bottomSelectedMatBoard={bottomSelectedMatBoard}
+                  bottomMatWidth={parseFloat(bottomUniformWidth) || 2}
+                  vGroove={vGroove}
+                  className="w-full"
+                />
+              )}
             </div>
           </div>
 
@@ -297,20 +318,28 @@ const FrameBuilder: React.FC = () => {
                     { id: 'glass', label: 'Glass & Backing' },
                     { id: 'printing', label: 'Printing' },
                     { id: 'extras', label: 'Extras' }
-                  ].map((tab) => (
-                  <li key={tab.id} className="flex-1">
-                    <button
-                      className={`w-full px-4 py-3 text-sm font-medium transition-colors ${
-                        activeTab === tab.id 
-                          ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50' 
-                          : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                      }`}
-                      onClick={() => setActiveTab(tab.id as TabType)}
-                    >
-                      {tab.label}
-                    </button>
-                  </li>
-                  ))}
+                  ].map((tab) => {
+                    const is3DFrame = selectedFrame?.material === '3D';
+                    const isDisabled = tab.id === 'mats' && is3DFrame;
+                    
+                    return (
+                      <li key={tab.id} className="flex-1">
+                        <button
+                          className={`w-full px-4 py-3 text-sm font-medium transition-colors ${
+                            activeTab === tab.id 
+                              ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50' 
+                              : isDisabled
+                              ? 'text-gray-400 cursor-not-allowed bg-gray-50'
+                              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                          }`}
+                          onClick={() => !isDisabled && setActiveTab(tab.id as TabType)}
+                          disabled={isDisabled}
+                        >
+                          {tab.label}
+                        </button>
+                      </li>
+                    );
+                  })}
               </ul>
 
               <div className="p-6">
@@ -338,6 +367,7 @@ const FrameBuilder: React.FC = () => {
                     setImageOverlap={setImageOverlap}
                     vGroove={vGroove}
                     setVGroove={setVGroove}
+                    is3DFrame={selectedFrame?.material === '3D'}
                     activeMatCategory={activeMatCategory}
                     setActiveMatCategory={setActiveMatCategory}
                     selectedMatBoard={selectedMatBoard}

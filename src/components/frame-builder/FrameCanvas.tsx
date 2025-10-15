@@ -50,11 +50,42 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Calculate dynamic canvas size based on mat widths
-    const baseCanvasWidth = 450; // Decreased width
-    const baseCanvasHeight = 600; // Increased height more
-    const maxCanvasWidth = 1200; // Increased maximum canvas width
-    const maxCanvasHeight = 1500; // Increased maximum canvas height
+    // Calculate dynamic canvas size based on picture box size
+    // Picture box size from input (in cm)
+    const pictureBoxWidthCm = Number(width) || 20; // Default to 20cm if not set
+    const pictureBoxHeightCm = Number(height) || 30; // Default to 30cm if not set
+    
+    // Convert picture box to pixels (25 pixels per cm for zoomed in view)
+    const cmToPixel = 25; // Increased from 15 to 25 for closer view
+    const pictureBoxWidthPx = pictureBoxWidthCm * cmToPixel;
+    const pictureBoxHeightPx = pictureBoxHeightCm * cmToPixel;
+    
+    // Calculate frame border (inversely proportional to size)
+    const minDimension = Math.min(pictureBoxWidthCm, pictureBoxHeightCm);
+    const isFloatCanvas = frame?.material === 'Floating';
+    
+    // Frame border calculation to match frameshop.com.au exactly
+    let frameBorderCm;
+    if (minDimension < 20) {
+      // Small prints (4x6): use 1.5cm border to match frameshop.com.au
+      frameBorderCm = 1.5;
+    } else if (minDimension < 50) {
+      // Medium prints: use proportional scaling but with minimum
+      frameBorderCm = Math.max(1.0, (frame?.width || 3) * 15 / minDimension);
+    } else if (minDimension < 85) {
+      // A1 size: use 1.5cm border to match frameshop style
+      frameBorderCm = 1.5;
+    } else {
+      // A0 and larger: use 1.5cm border to match frameshop.com.au exactly
+      frameBorderCm = 1.5;
+    }
+    
+    // Float canvas frames are 50% thinner
+    if (isFloatCanvas) {
+      frameBorderCm = frameBorderCm * 0.5;
+    }
+    
+    const frameBorderPx = frameBorderCm * cmToPixel; // Convert to pixels using same scale
     
     // Calculate additional space needed for mats
     let additionalWidth = 0;
@@ -63,80 +94,70 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     if (matStyle === '1' && selectedMatBoard) {
       // Single mat - add space for mat width (uniform or custom)
       if (matWidthType === 'custom') {
-        // Custom widths: use left+right for width, top+bottom for height
-        const leftWidth = (parseFloat(customWidths.left) || 0) * 20;
-        const rightWidth = (parseFloat(customWidths.right) || 0) * 20;
-        const topWidth = (parseFloat(customWidths.top) || 0) * 20;
-        const bottomWidth = (parseFloat(customWidths.bottom) || 0) * 20;
+        const leftWidth = (parseFloat(customWidths.left) || 0) * cmToPixel;
+        const rightWidth = (parseFloat(customWidths.right) || 0) * cmToPixel;
+        const topWidth = (parseFloat(customWidths.top) || 0) * cmToPixel;
+        const bottomWidth = (parseFloat(customWidths.bottom) || 0) * cmToPixel;
         additionalWidth = leftWidth + rightWidth;
         additionalHeight = topWidth + bottomWidth;
       } else {
-        // Uniform width
-        const matPadding = (matWidth || 0) * 20; // Convert cm to pixels (20 pixels per cm)
+        const matPadding = (matWidth || 0) * cmToPixel;
         additionalWidth = matPadding * 2;
         additionalHeight = matPadding * 2;
       }
     } else if (matStyle === '2' && selectedMatBoard) {
       // Double mat - add space for both top mat and bottom mat
       if (matWidthType === 'custom') {
-        // Custom widths: use left+right for width, top+bottom for height
-        const leftWidth = (parseFloat(customWidths.left) || 0) * 20;
-        const rightWidth = (parseFloat(customWidths.right) || 0) * 20;
-        const topWidth = (parseFloat(customWidths.top) || 0) * 20;
-        const bottomWidth = (parseFloat(customWidths.bottom) || 0) * 20;
-        const bottomMatPadding = (bottomMatWidth || 0) * 20;
+        const leftWidth = (parseFloat(customWidths.left) || 0) * cmToPixel;
+        const rightWidth = (parseFloat(customWidths.right) || 0) * cmToPixel;
+        const topWidth = (parseFloat(customWidths.top) || 0) * cmToPixel;
+        const bottomWidth = (parseFloat(customWidths.bottom) || 0) * cmToPixel;
+        const bottomMatPadding = (bottomMatWidth || 0) * cmToPixel;
         additionalWidth = leftWidth + rightWidth + (bottomMatPadding * 2);
         additionalHeight = topWidth + bottomWidth + (bottomMatPadding * 2);
       } else {
-        // Uniform width
-        const topMatPadding = (matWidth || 0) * 20; // 20 pixels per cm
-        const bottomMatPadding = (bottomMatWidth || 0) * 20; // 20 pixels per cm
+        const topMatPadding = (matWidth || 0) * cmToPixel;
+        const bottomMatPadding = (bottomMatWidth || 0) * cmToPixel;
         additionalWidth = (topMatPadding + bottomMatPadding) * 2;
         additionalHeight = (topMatPadding + bottomMatPadding) * 2;
       }
     }
     
-    // Calculate final canvas size with limits
-    const canvasWidth = Math.min(baseCanvasWidth + additionalWidth, maxCanvasWidth);
-    const canvasHeight = Math.min(baseCanvasHeight + additionalHeight, maxCanvasHeight);
+    // Calculate canvas size: picture box + frame borders + mat space + padding
+    const padding = 40; // Padding around the entire frame
+    const canvasWidth = pictureBoxWidthPx + (frameBorderPx * 2) + additionalWidth + (padding * 2);
+    const canvasHeight = pictureBoxHeightPx + (frameBorderPx * 2) + additionalHeight + (padding * 2);
     
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    // Apply reasonable limits
+    const maxCanvasWidth = 1500;
+    const maxCanvasHeight = 2000;
+    const finalCanvasWidth = Math.min(canvasWidth, maxCanvasWidth);
+    const finalCanvasHeight = Math.min(canvasHeight, maxCanvasHeight);
+    
+    canvas.width = finalCanvasWidth;
+    canvas.height = finalCanvasHeight;
 
     // Clear canvas with transparent background
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.clearRect(0, 0, finalCanvasWidth, finalCanvasHeight);
 
     if (!frame) return;
 
-    // Calculate frame dimensions based on image size
-    const imageWidth = Number(width) || 0;
-    const imageHeight = Number(height) || 0;
+    // Use pre-calculated values from canvas size calculation above
+    // frameWidth already calculated: frameBorderPx
+    // pictureBoxDisplay already calculated: pictureBoxWidthPx, pictureBoxHeightPx
+    const frameWidth = frameBorderPx;
     
-    // For Float for Canvas, use smaller frame width
-    const isFloatCanvas = frame.material === 'Floating';
-    const frameWidth = isFloatCanvas ? frame.width * 15 : frame.width * 30; // Smaller border for float canvas
+    // Calculate total frame dimensions (picture box + frame borders)
+    const totalFrameWidth = pictureBoxWidthPx + (frameWidth * 2);
+    const totalFrameHeight = pictureBoxHeightPx + (frameWidth * 2);
     
-    // Calculate display size to fill the entire canvas width
-    const padding = 10; // Minimal padding around the frame
-    const availableWidth = canvasWidth - (padding * 2) - (frameWidth * 2);
-    const availableHeight = canvasHeight - (padding * 2) - (frameWidth * 2);
+    // Center the frame on the canvas
+    const frameX = (finalCanvasWidth - totalFrameWidth) / 2;
+    const frameY = (finalCanvasHeight - totalFrameHeight) / 2;
     
-    // Calculate scale factor to fit the image in available space
-    const scaleX = availableWidth / imageWidth;
-    const scaleY = availableHeight / imageHeight;
-    const scaleFactor = Math.min(scaleX, scaleY); // Use smaller scale to maintain aspect ratio
-    
-    let displayWidth = imageWidth * scaleFactor;
-    let displayHeight = imageHeight * scaleFactor;
-
-    // Position frame to fill entire canvas width
-    const totalFrameWidth = canvasWidth - (padding * 2); // Fill entire canvas width
-    const totalFrameHeight = displayHeight + frameWidth * 2;
-    const frameX = padding;
-    const frameY = (canvasHeight - totalFrameHeight) / 2; // Center vertically
-    
-    // Adjust display width to fill the frame
-    displayWidth = totalFrameWidth - (frameWidth * 2);
+    // Display dimensions are the same as picture box dimensions
+    let displayWidth = pictureBoxWidthPx;
+    let displayHeight = pictureBoxHeightPx;
 
     // Draw shadow first
     ctx.save();
@@ -291,7 +312,7 @@ export const FrameCanvas: React.FC<FrameCanvasProps> = ({
     ctx.restore();
 
     // Draw size information like frameshop.com.au - use actual picture box dimensions
-    drawSizeInfo(ctx, pictureBoxX, pictureBoxY, pictureBoxWidth, pictureBoxHeight, displayWidth, displayHeight, width, height, units, frame);
+    drawSizeInfo(ctx, pictureBoxX, pictureBoxY, pictureBoxWidth, pictureBoxHeight, displayWidth, displayHeight, width, height, units, frame, frameWidth);
 
   }, [width, height, units, frame, image, matting, selectedMatBoard, matWidth, matWidthType, customWidths, matStyle, bottomSelectedMatBoard, bottomMatWidth, vGroove]);
 
@@ -791,7 +812,8 @@ const drawFrame = (
     originalWidth: number,
     originalHeight: number,
     units: string,
-    frame: Frame
+    frame: Frame,
+    actualFrameWidthPx: number
   ) => {
     // Calculate the three different size measurements like frameshop.com.au
     const numOriginalWidth = Number(originalWidth) || 0;
@@ -806,11 +828,13 @@ const drawFrame = (
     const visibleHeight = numOriginalHeight - rebateSize;
     const visibleSize = `${visibleWidth.toFixed(1)} x ${visibleHeight.toFixed(1)} ${units}`;
     
-    // 3. Outside (approx): Image size plus frame width
-    const frameWidthTotal = frame.width * 2; // Frame width on both sides
+    // 3. Outside (approx): Image size plus actual frame width (converted back to cm)
+    const actualFrameWidthCm = actualFrameWidthPx / 25; // Convert pixels back to cm using our scale
+    const frameWidthTotal = actualFrameWidthCm * 2; // Frame width on both sides
     const outsideWidth = numOriginalWidth + frameWidthTotal;
     const outsideHeight = numOriginalHeight + frameWidthTotal;
     const outsideSize = `${outsideWidth.toFixed(1)} x ${outsideHeight.toFixed(1)} ${units}`;
+    
 
     // Draw size information in the center of the picture box
     ctx.fillStyle = '#666666';

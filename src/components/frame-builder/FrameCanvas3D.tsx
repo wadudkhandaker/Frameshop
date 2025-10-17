@@ -35,6 +35,14 @@ export const FrameCanvas3D: React.FC<FrameCanvas3DProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [rotation, setRotation] = useState({ x: 0.1, y: 0.15 });
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+  const [canvasInfo, setCanvasInfo] = useState({
+    actualWidth: 0,
+    actualHeight: 0,
+    canvasWidth: 0,
+    canvasHeight: 0,
+    canvasDepth: 0,
+    maxDimension: 0
+  });
 
   const getFrameColor = (color: string): number => {
     const map: Record<string, number> = {
@@ -49,7 +57,7 @@ export const FrameCanvas3D: React.FC<FrameCanvas3DProps> = ({
 
   const toSceneUnits = (val: number, u: "cm" | "inch"): number => {
     const cm = u === "inch" ? val * 2.54 : val;
-    return cm / 10;
+    return cm / 3; // Further increased scale factor to make size differences more obvious
   };
 
   useEffect(() => {
@@ -69,7 +77,7 @@ export const FrameCanvas3D: React.FC<FrameCanvas3DProps> = ({
       0.1,
       1000
     );
-    camera.position.set(1.5, 0.6, 4.2); // pull back for wider frame
+    camera.position.set(1.5, 0.6, 4.2); // Initial position, will be updated after canvas size calculation
     camera.lookAt(0, 0, 0);
 
     // Lights
@@ -82,21 +90,68 @@ export const FrameCanvas3D: React.FC<FrameCanvas3DProps> = ({
     dir.castShadow = true;
     scene.add(dir);
 
-    // Ground (wall)
+    // Ground (wall) - will be created after canvas dimensions are calculated
+
+    // Sizes - scale proportionally with input dimensions
+    const actualWidth = width > 0 ? width : 40; // Only use default if width is 0 or undefined
+    const actualHeight = height > 0 ? height : 60; // Only use default if height is 0 or undefined
+    const canvasWidth = toSceneUnits(actualWidth, units);
+    const canvasHeight = toSceneUnits(actualHeight, units);
+    const canvasDepth = toSceneUnits(frame.depth || 8, "cm"); // Increase depth significantly for better edge visibility
+    const taperFactor = 0.98; // Minimal taper to maintain rectangular shape
+    
+    // Calculate camera positioning
+    const maxCanvasDimension = Math.max(canvasWidth, canvasHeight);
+    const minCanvasDimension = Math.min(canvasWidth, canvasHeight);
+    const cameraDistance = maxCanvasDimension * 2.0; // Further back for better perspective
+    const cameraHeight = maxCanvasDimension * 0.4;
+    const cameraX = maxCanvasDimension * 0.4; // More to the side to see right edge
+    
+    // Debug: Log the dimensions being used
+    console.log('3D Frame dimensions:', {
+      inputWidth: width,
+      inputHeight: height,
+      actualWidth,
+      actualHeight,
+      units,
+      canvasWidth,
+      canvasHeight,
+      canvasDepth,
+      frameDepth: frame.depth,
+      maxDimension: maxCanvasDimension,
+      cameraDistance: cameraDistance,
+      aspectRatio: canvasWidth / canvasHeight
+    });
+    
+    // Size comparison for debugging
+    if (actualWidth === 27.9 && actualHeight === 35.6) {
+      console.log('🔍 11x14 detected - should be smaller than 18x24');
+    }
+    if (actualWidth === 45.6 && actualHeight === 61.0) {
+      console.log('🔍 18x24 detected - should be bigger than 11x14');
+    }
+    
+    // Update canvas info for overlay
+    setCanvasInfo({
+      actualWidth,
+      actualHeight,
+      canvasWidth,
+      canvasHeight,
+      canvasDepth,
+      maxDimension: maxCanvasDimension
+    });
+    
+    camera.position.set(cameraX, cameraHeight, cameraDistance);
+    
+    // Create ground (wall) - scale with canvas size
     const plane = new THREE.Mesh(
-      new THREE.PlaneGeometry(12, 6), // make wall wider
+      new THREE.PlaneGeometry(maxCanvasDimension * 2, maxCanvasDimension * 1.5), // Scale with canvas
       new THREE.ShadowMaterial({ opacity: 0.25 })
     );
     plane.rotation.x = -Math.PI / 2;
-    plane.position.y = -1.5;
+    plane.position.y = -maxCanvasDimension * 0.3; // Position relative to canvas size
     plane.receiveShadow = true;
     scene.add(plane);
-
-    // Sizes (make canvas wide and less tall)
-    const canvasWidth = toSceneUnits(width || 240, units); // much wider
-    const canvasHeight = toSceneUnits(height || 90, units); // shorter
-    const canvasDepth = toSceneUnits(frame.depth || 3, "cm");
-    const taperFactor = 0.9; // minor taper
 
     // Group
     const group = new THREE.Group();
@@ -132,14 +187,14 @@ export const FrameCanvas3D: React.FC<FrameCanvas3DProps> = ({
     back.position.z = -canvasDepth / 2;
     group.add(back);
 
-    // RIGHT edge (wrapped texture)
+    // RIGHT edge (wrapped texture) - make it more visible
     let rightMat: THREE.MeshStandardMaterial;
     if (image) {
       const tex = loader.load(image);
       tex.wrapS = THREE.ClampToEdgeWrapping;
       tex.wrapT = THREE.ClampToEdgeWrapping;
-      tex.offset.set(0.98, 0);
-      tex.repeat.set(0.02, 1);
+      tex.offset.set(0.95, 0); // Show more of the right edge
+      tex.repeat.set(0.05, 1); // Wider strip for better visibility
       tex.colorSpace = THREE.SRGBColorSpace;
       rightMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 });
       textures.push(tex);
@@ -151,29 +206,59 @@ export const FrameCanvas3D: React.FC<FrameCanvas3DProps> = ({
     right.rotation.y = Math.PI / 2;
     group.add(right);
 
-    // LEFT edge
-    const left = new THREE.Mesh(
-      new THREE.PlaneGeometry(canvasDepth * taperFactor, canvasHeight),
-      new THREE.MeshStandardMaterial({ color: getFrameColor(frame.color) })
-    );
+    // LEFT edge (wrapped texture)
+    let leftMat: THREE.MeshStandardMaterial;
+    if (image) {
+      const tex = loader.load(image);
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.offset.set(0, 0); // Show left edge of image
+      tex.repeat.set(0.05, 1); // Wider strip for better visibility
+      tex.colorSpace = THREE.SRGBColorSpace;
+      leftMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 });
+      textures.push(tex);
+    } else {
+      leftMat = new THREE.MeshStandardMaterial({ color: getFrameColor(frame.color) });
+    }
+    const left = new THREE.Mesh(new THREE.PlaneGeometry(canvasDepth * taperFactor, canvasHeight), leftMat);
     left.position.x = -canvasWidth / 2;
     left.rotation.y = -Math.PI / 2;
     group.add(left);
 
-    // TOP edge
-    const top = new THREE.Mesh(
-      new THREE.PlaneGeometry(canvasWidth, canvasDepth * taperFactor),
-      new THREE.MeshStandardMaterial({ color: getFrameColor(frame.color) })
-    );
+    // TOP edge (wrapped texture)
+    let topMat: THREE.MeshStandardMaterial;
+    if (image) {
+      const tex = loader.load(image);
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.offset.set(0, 0.95); // Show top edge of image
+      tex.repeat.set(1, 0.05); // Wider strip for better visibility
+      tex.colorSpace = THREE.SRGBColorSpace;
+      topMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 });
+      textures.push(tex);
+    } else {
+      topMat = new THREE.MeshStandardMaterial({ color: getFrameColor(frame.color) });
+    }
+    const top = new THREE.Mesh(new THREE.PlaneGeometry(canvasWidth, canvasDepth * taperFactor), topMat);
     top.position.y = canvasHeight / 2;
     top.rotation.x = Math.PI / 2;
     group.add(top);
 
-    // BOTTOM edge
-    const bottom = new THREE.Mesh(
-      new THREE.PlaneGeometry(canvasWidth, canvasDepth),
-      new THREE.MeshStandardMaterial({ color: getFrameColor(frame.color) })
-    );
+    // BOTTOM edge (wrapped texture)
+    let bottomMat: THREE.MeshStandardMaterial;
+    if (image) {
+      const tex = loader.load(image);
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.offset.set(0, 0); // Show bottom edge of image
+      tex.repeat.set(1, 0.05); // Wider strip for better visibility
+      tex.colorSpace = THREE.SRGBColorSpace;
+      bottomMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 });
+      textures.push(tex);
+    } else {
+      bottomMat = new THREE.MeshStandardMaterial({ color: getFrameColor(frame.color) });
+    }
+    const bottom = new THREE.Mesh(new THREE.PlaneGeometry(canvasWidth, canvasDepth), bottomMat);
     bottom.position.y = -canvasHeight / 2;
     bottom.rotation.x = -Math.PI / 2;
     group.add(bottom);
@@ -254,6 +339,21 @@ export const FrameCanvas3D: React.FC<FrameCanvas3DProps> = ({
           cursor: isDragging ? "grabbing" : "grab",
         }}
       />
+      
+      {/* Info overlay */}
+      {canvasInfo.maxDimension > 0 && (
+        <div className="absolute top-4 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm">
+          <div className="font-semibold">{frame.name}</div>
+          <div>Size: {canvasInfo.actualWidth} × {canvasInfo.actualHeight} {units}</div>
+          <div>Canvas: {canvasInfo.canvasWidth.toFixed(2)} × {canvasInfo.canvasHeight.toFixed(2)} × {canvasInfo.canvasDepth.toFixed(2)} units</div>
+          <div>Max Dim: {canvasInfo.maxDimension.toFixed(2)} | Aspect: {(canvasInfo.canvasWidth/canvasInfo.canvasHeight).toFixed(2)}</div>
+          {isDragging ? (
+            <div className="text-blue-300">↻ Rotating...</div>
+          ) : (
+            <div className="text-gray-300">Drag to rotate</div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

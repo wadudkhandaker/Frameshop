@@ -57,7 +57,7 @@ const FrameBuilder: React.FC = () => {
       setActiveTab('frames');
     }
   }, [selectedFrame, activeTab]);
-  
+
   // Image upload states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [processedImageData, setProcessedImageData] = useState<{
@@ -73,6 +73,25 @@ const FrameBuilder: React.FC = () => {
   const [imageWidth, setImageWidth] = useState<string>('10.2');
   const [imageHeight, setImageHeight] = useState<string>('15.3');
   const [selectedStandardSize, setSelectedStandardSize] = useState<string>('');
+
+  // Clear selected standard size when switching frame types
+  useEffect(() => {
+    // Only run when frame changes, not when size changes
+    if (!selectedFrame) return;
+    
+    // Check if current selected size is valid for the selected frame type
+    if (selectedStandardSize && selectedFrame?.material === '3D') {
+      // For 3D frames, check if selected size is one of the allowed sizes
+      const selectedSize = standardSizes.find(s => s.label === selectedStandardSize);
+      const isValidFor3D = selectedSize && ['4x6', '11x14', '18x24'].includes(selectedSize.name);
+      if (!isValidFor3D) {
+        setSelectedStandardSize('');
+      }
+    } else if (selectedStandardSize && selectedFrame?.material !== '3D') {
+      // If switching from 3D to regular frame, don't clear the selection
+      // All sizes are valid for regular frames
+    }
+  }, [selectedFrame]); // Only depend on selectedFrame, not selectedStandardSize
   
   // Mat states
   const [matStyle, setMatStyle] = useState<MatStyle>('1');
@@ -113,11 +132,11 @@ const FrameBuilder: React.FC = () => {
   const [bulkOption, setBulkOption] = useState<string>('');
 
   const handleStandardSizeSelect = (sizeLabel: string) => {
+    setSelectedStandardSize(sizeLabel); // Always set the selected value first
     const size = standardSizes.find(s => s.label === sizeLabel);
     if (size) {
       setImageWidth(size.width.toString());
       setImageHeight(size.height.toString());
-      setSelectedStandardSize(sizeLabel);
     }
   };
 
@@ -168,6 +187,7 @@ const FrameBuilder: React.FC = () => {
               {/* Conditional rendering: 3D Canvas for 3D frames, regular Canvas for others */}
               {selectedFrame?.material === '3D' ? (
                 <FrameCanvas3D
+                  key={`3d-${imageWidth}-${imageHeight}-${selectedFrame?.id}`}
                   width={parseFloat(imageWidth) || 0}
                   height={parseFloat(imageHeight) || 0}
                   units={units}
@@ -295,11 +315,25 @@ const FrameBuilder: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Select standard size</option>
-                        {standardSizes && standardSizes.map((size) => (
-                          <option key={size.label} value={size.label}>
-                            {size.label}
-                          </option>
-                        ))}
+                        {(() => {
+                          // Filter standard sizes based on frame type
+                          let filteredSizes = standardSizes;
+                          
+                          if (selectedFrame?.material === '3D') {
+                            // For 3D frames, only show 3 specific sizes
+                            filteredSizes = standardSizes.filter(size => 
+                              size.name === '4x6' || 
+                              size.name === '11x14' || 
+                              size.name === '18x24'
+                            );
+                          }
+                          
+                          return filteredSizes.map((size) => (
+                            <option key={size.label} value={size.label}>
+                              {size.label}
+                            </option>
+                          ));
+                        })()}
                       </select>
                     </div>
                   </div>
